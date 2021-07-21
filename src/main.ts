@@ -1,5 +1,10 @@
 import { NvimPlugin } from 'neovim';
-import { EditAction, HiddenAction } from './source/Actions';
+import {
+  DirUpAction,
+  EditAction,
+  HiddenAction,
+  TouchAction,
+} from './source/Actions';
 import { CreateHighlight } from './source/Highlight';
 import { Store } from './source/Store';
 import { Toggle } from './source/Toggle';
@@ -18,16 +23,20 @@ export default function myplugin(plugin: NvimPlugin) {
   plugin.registerFunction(
     'NodeTreeAction',
     async (args: object) => {
+      const [cursorPos, _] = await plugin.nvim.window.cursor;
       switch (args.toString()) {
         case 'edit':
-          const [cursorPos, _] = await plugin.nvim.window.cursor;
           EditAction(cursorPos);
           break;
         case 'dirUp':
+          DirUpAction(cursorPos);
           break;
         case 'touch':
+          TouchAction(cursorPos);
           break;
         case 'mkdir':
+          break;
+        case 'rename':
           break;
         case 'hide':
           HiddenAction();

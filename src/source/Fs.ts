@@ -1,6 +1,5 @@
 import { readdirSync, Stats } from 'fs';
 import { stat } from 'fs/promises';
-import { Log } from './Tools';
 import { FileNode, FolderNode, VNode } from './Node';
 
 type FileName = string;
@@ -93,7 +92,7 @@ async function sortFiles(
 //  result:
 //    filename = english.md
 //    path = /home/ph/Desktop
-function ParsePwd(pwd: string): [Path, FileName] {
+export function ParsePwd(pwd: string): [Path, FileName] {
   let res = pwd.split('/');
   let filename = res[res.length - 1];
   let path = pwd.slice(0, pwd.length - filename.length - 1);
