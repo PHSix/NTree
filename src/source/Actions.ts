@@ -1,11 +1,16 @@
 import { ParseVNode } from './Fs';
-import { Neovim } from 'neovim';
-import { FolderNode, VNode } from './Node';
+import { FileNode, FolderNode, VNode } from './Node';
 import { Option } from './Option';
 import { UpdateRender } from './Render';
-import { DFS, InquireNode, MergeVNode, Store } from './Store';
-import { closeSync, openSync, statSync } from 'fs';
-import { Log } from './Tools';
+import { Store } from './Store';
+import {
+  DFS,
+  UpdateNodeByPos,
+  UpdateNodeByFullPath,
+  MergeVNode,
+} from './Utils';
+import { closeSync, mkdirSync, openSync, renameSync, statSync } from 'fs';
+import { Log, Logm } from './Tools';
 export async function HiddenAction() {
   Option.hidden_file = !Option.hidden_file;
   UpdateRender();
@@ -15,14 +20,28 @@ export async function HiddenAction() {
 // edit a node.
 // if file to edit in current window.
 // if fold node will unfold or fold.
-// WARN: Can not be used now.
 export async function EditAction(pos: number) {
-  const [vnode, status] = await InquireNode(pos);
-  if (status === 1) {
+  const callback = async (vnode: VNode): Promise<VNode> => {
+    if (vnode instanceof FileNode) {
+      return vnode;
+    }
+    let v = vnode as FolderNode;
+    v.isUnfold = !v.isUnfold;
+    if (v.children.length === 0) {
+      const f = (await ParseVNode(
+        `${v.path}/${v.filename}`,
+        v.key
+      )) as FolderNode;
+      v.children = f.children;
+    }
+    return v;
+  };
+
+  const [, vnode] = await UpdateNodeByPos(pos, callback);
+  if (vnode instanceof FileNode) {
     Store.nvim.setWindow(Store.window);
     Store.nvim.command(`:e ${vnode.path}/${vnode.filename}`);
   } else {
-    Store.root = vnode;
     UpdateRender();
   }
 }
@@ -30,51 +49,107 @@ export async function EditAction(pos: number) {
 //
 // set the pwd to higher level root
 //
-// WARN: Have error before callback;(In condition)
-export async function DirUpAction(pos: number) {
+export async function DirUpAction(_: number) {
   Store.pwd = Store.pwd.slice(
     0,
     Store.pwd.length - Store.pwd.split('/').pop().length - 1
   );
-  Store.root = await ParseVNode(Store.pwd);
+  const newNode = (await ParseVNode(Store.pwd)) as FolderNode;
+
+  newNode.children = MergeVNode([Store.root], newNode.children);
+
+  Store.root = newNode;
   UpdateRender();
 }
 
-export async function TouchAction(pos: number) {
-  let v: VNode = null;
-  const condition = (vnode: VNode, counter: number, pos: number) => {
-    if (
-      counter < pos &&
-      vnode instanceof FolderNode &&
-      (vnode as FolderNode).children.length + counter >= pos
-    ) {
-      v = vnode;
-      return false;
-    } else if (counter >= pos && `${vnode.path}/${vnode.filename}` === v.path) {
-      return true;
-    } else {
-      return false;
-    }
-  };
+//
+// make a directory
+//
+export async function MkdirAction(pos: number) {
   const callback = async (vnode: VNode): Promise<VNode> => {
-    const res = await RKInput(Store.nvim, `Touch a file: ${v.path}/`);
-    if (res.length === 0) {
+    const newDir = (await Store.nvim.callFunction(
+      'input',
+      `Make a directory: ${vnode.path}/`
+    )) as string;
+    if (newDir.length === 0) {
+      return;
+    }
+    mkdirSync(`${vnode.path}/${newDir}`);
+
+    return vnode;
+  };
+  const [, vnode] = await UpdateNodeByPos(pos, callback);
+  const updeteNodePath = `${vnode.path}`;
+  const newNode = await ParseVNode(updeteNodePath);
+  const callback2 = async (vnode: VNode): Promise<VNode> => {
+    (vnode as FolderNode).children = MergeVNode(
+      (vnode as FolderNode).children,
+      (newNode as FolderNode).children
+    );
+    return vnode;
+  };
+  await UpdateNodeByFullPath(newNode, callback2);
+  UpdateRender();
+}
+
+//
+// touch a file
+//
+export async function TouchAction(pos: number) {
+  const callback = async (vnode: VNode): Promise<VNode> => {
+    const newFileName = (await Store.nvim.callFunction(
+      'input',
+      `Touch a file: ${vnode.path}/`
+    )) as string;
+    if (newFileName.length === 0) {
       return;
     }
     try {
-      statSync(`${v.path}/${res}`);
+      statSync(`${vnode.path}/${newFileName}`);
     } catch (err) {
-      closeSync(openSync(`${v.path}/${res}`, 'w'));
+      closeSync(openSync(`${vnode.path}/${newFileName}`, 'w'));
     }
-
-    const newVNode = await ParseVNode(v.path);
-    return MergeVNode(newVNode as FolderNode, vnode as FolderNode);
+    return vnode;
   };
-  await DFS(Store.root, pos, condition, callback);
-  Log('error');
+  const [, vnode] = await UpdateNodeByPos(pos, callback);
+  const updeteNodePath = `${vnode.path}`;
+  const newNode = await ParseVNode(updeteNodePath);
+  const callback2 = async (vnode: VNode): Promise<VNode> => {
+    (vnode as FolderNode).children = MergeVNode(
+      (vnode as FolderNode).children,
+      (newNode as FolderNode).children
+    );
+    return vnode;
+  };
+  await UpdateNodeByFullPath(newNode, callback2);
+  UpdateRender();
 }
 
-export async function RKInput(nvim: Neovim, tips: string): Promise<string> {
-  const res = (await nvim.callFunction('input', tips)) as string;
-  return res;
+export async function RenameAction(pos: number) {
+  const callback = async (vnode: VNode): Promise<VNode> => {
+    const newFileName = (await Store.nvim.callFunction('input', [
+      `Rename to: ${vnode.path}/`,
+      vnode.filename,
+    ])) as string;
+    if (newFileName.length === 0) {
+      return;
+    }
+    renameSync(
+      `${vnode.path}/${vnode.filename}`,
+      `${vnode.path}/${newFileName}`
+    );
+    return vnode;
+  };
+  const [, vnode] = await UpdateNodeByPos(pos, callback);
+  const updeteNodePath = `${vnode.path}`;
+  const newNode = await ParseVNode(updeteNodePath);
+  const callback2 = async (vnode: VNode): Promise<VNode> => {
+    (vnode as FolderNode).children = MergeVNode(
+      (vnode as FolderNode).children,
+      (newNode as FolderNode).children
+    );
+    return vnode;
+  };
+  await UpdateNodeByFullPath(newNode, callback2);
+  UpdateRender();
 }

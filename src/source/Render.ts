@@ -11,17 +11,21 @@ interface HighlightTags {
 
 export default async function Render() {
   Store.root = (await ParseVNode(Store.pwd)) as FolderNode;
-  const [h_text, h_higroup] = parser(Store.root);
+  const [h_text, h_higroup] = ParseVDom(Store.root);
+  Store.textCache = h_text;
   h(h_text, h_higroup);
 }
 
 export async function UpdateRender() {
-  const [h_text, h_higroup] = parser(Store.root);
+  const [h_text, h_higroup] = ParseVDom(Store.root);
+  Store.textCache = h_text;
   h(h_text, h_higroup);
 }
 
+// NOTE: Can not use promise all to render highlight rules and text.
 async function h(ctx: string[], h_higroup: HighlightTags) {
-  await Promise.all<void>([defineHighlight(h_higroup), hText(ctx)]);
+  // await Promise.all<void>([defineHighlight(h_higroup), hText(ctx)]);
+  await hText(ctx).then(() => defineHighlight(h_higroup));
 }
 
 async function defineHighlight(h_higroup: HighlightTags) {
@@ -29,7 +33,7 @@ async function defineHighlight(h_higroup: HighlightTags) {
   h_higroup.lines.forEach((line) => {
     hi_queue.push(defineGroup('BufferLineError', line));
   });
-  await Promise.all(hi_queue);
+  Promise.all(hi_queue);
 }
 
 async function defineGroup(hlGroup: string, line: number) {
@@ -56,9 +60,9 @@ async function hText(ctx: string[]) {
 
 //
 // parse VDom
-// @return [string[], ]
+// @return [string[], HighlightTags]
 //
-function parser(vnode: VNode): [string[], HighlightTags] {
+function ParseVDom(vnode: VNode): [string[], HighlightTags] {
   const root_param_length = Store.pwd.split('/').length - 1;
   const h_higroup: HighlightTags = {
     counter: 0,
@@ -81,7 +85,7 @@ function parser(vnode: VNode): [string[], HighlightTags] {
       return;
     }
     h_higroup.counter++;
-    h_higroup.lines.push(h_higroup.counter);
+    h_higroup.lines.push(h_higroup.counter - 1);
     h_text.push(
       `${'  '.repeat(
         vfolder.path.split('/').length - root_param_length

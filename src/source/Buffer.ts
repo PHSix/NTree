@@ -43,5 +43,6 @@ async function mapKeys(buffer: Buffer) {
   mapQueue.push(map('q', ':q<CR>'));
   mapQueue.push(map('r', ":call NodeTreeAction('refresh')<CR>"));
   mapQueue.push(map('zh', ":call NodeTreeAction('hide')<CR>"));
+  mapQueue.push(map('rn', ":call NodeTreeAction('rename')<CR>"));
   await Promise.all<void>(mapQueue);
 }

@@ -1,5 +1,5 @@
 import { Buffer, Neovim, Window } from 'neovim';
-import { VNode } from './Node';
+import { FolderNode } from './Node';
 
 export interface InterfaceStore {
   buffer?: Buffer;
@@ -7,7 +7,8 @@ export interface InterfaceStore {
   // open file in this window.
   window?: Window;
   nvim?: Neovim;
-  root?: VNode;
+  root?: FolderNode;
+  textCache?: string[];
 }
 
 interface KeyMap {
@@ -25,4 +26,3 @@ export interface HiGroup {
   hlGroup: string;
   line: number;
 }
-
