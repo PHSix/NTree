@@ -12360,3 +12360,6 @@
 {"message":"response -> neovim.api.nvim_buf_add_highlight: 21","level":"debug"}
 {"message":"response -> neovim.api.nvim_buf_add_highlight: 21","level":"debug"}
 {"message":"response -> neovim.api.nvim_buf_add_highlight: 21","level":"debug"}
+{"message":"host.start","level":"debug"}
+{"level":"info","message":"handleRequest: "}
+{"level":"debug","message":"request received: "}
