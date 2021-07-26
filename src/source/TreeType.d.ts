@@ -4,7 +4,6 @@ import { FolderNode } from './Node';
 export interface InterfaceStore {
   buffer?: Buffer;
   pwd?: string;
-  // open file in this window.
   window?: Window;
   nvim?: Neovim;
   root?: FolderNode;
@@ -13,15 +12,12 @@ export interface InterfaceStore {
 }
 
 interface KeyMap {
-  key: string;
-  value: string;
+  [key: string]:string;
 }
 
 export interface InterfaceOption {
   namespace_id?: number;
-  hidden_file: boolean;
-  keymaps: KeyMap[];
-  defaultKeyMaps: KeyMap[];
+  hide_file: boolean;
 }
 
 export interface HiGroup {

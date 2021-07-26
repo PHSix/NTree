@@ -7,7 +7,9 @@ type Path = string;
 type Folders = string[];
 type Files = string[];
 
-// Folder constructor
+/*
+ * Folder constructor
+ * */
 function newFolder(
   path: string,
   filename: string,
@@ -18,7 +20,9 @@ function newFolder(
   return f;
 }
 
-// File constructor
+/*
+ * File constructor
+ * */
 function newFile(
   path: string,
   filename: string,
@@ -28,10 +32,14 @@ function newFile(
   return f;
 }
 
-// Parse a path to a VDom tree and return
-// @param path
-// @param key
-// @return Promise<VNode>
+/*
+  * Parse a path to a VDom tree and return
+  * @param path
+  * @param key
+  * @return Promise<VNode>
+  *
+  * */
+
 export async function ParseVNode(
   pwd: string,
   key: symbol = Symbol()
@@ -60,9 +68,10 @@ export async function ParseVNode(
   return vDom;
 }
 
-// To sorting file and folder.
-// @return [Folders, Files]
-// TODO: Performance optimization
+/*
+  * To sorting file and folder.
+  * @return [Folders, Files]
+  * */
 async function sortFiles(
   pwd: string,
   files: string[]
@@ -85,13 +94,15 @@ async function sortFiles(
   return [resFolders, resFiles];
 }
 
-// To parse a full path.
-// example:
-//  input:
-//    pwd = '/home/ph/Desktop/english.md'
-//  result:
-//    filename = english.md
-//    path = /home/ph/Desktop
+/*
+  * To parse a full path.
+  * example:
+  *  input:
+  *    pwd = '/home/ph/Desktop/english.md'
+  *  result:
+  *    filename = english.md
+  *    path = /home/ph/Desktop
+  * */
 export function ParsePwd(pwd: string): [Path, FileName] {
   let res = pwd.split('/');
   let filename = res[res.length - 1];

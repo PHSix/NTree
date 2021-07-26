@@ -7,14 +7,15 @@ import { UpdateNodeByPos, UpdateNodeByFullPath, MergeVNode } from './Utils';
 import { closeSync, mkdirSync, openSync, renameSync, statSync } from 'fs';
 import { execSync } from 'child_process';
 export async function HiddenAction() {
-  Option.hidden_file = !Option.hidden_file;
+  Option.hide_file = !Option.hide_file;
   UpdateRender();
 }
 
-//
-// edit a node.
-// if file to edit in current window.
-// if fold node will unfold or fold.
+/*
+  * edit a node.                       
+  * if file to edit in current window.
+  * if fold node will unfold or fold.
+  * */
 export async function EditAction(pos: number) {
   const callback = async (vnode: VNode): Promise<VNode> => {
     if (vnode instanceof FileNode) {
@@ -41,9 +42,13 @@ export async function EditAction(pos: number) {
   }
 }
 
-//
-// set the pwd to higher level root
-//
+
+/*
+  * set the pwd to higher level root
+  * */
+
+
+
 export async function DirUpAction(_: number) {
   Store.pwd = Store.pwd.slice(
     0,
@@ -57,9 +62,9 @@ export async function DirUpAction(_: number) {
   UpdateRender();
 }
 
-//
-// make a directory
-//
+/*
+  * make a directory
+  * */
 export async function MkdirAction(pos: number) {
   const callback = async (vnode: VNode): Promise<VNode> => {
     const newDir = (await Store.nvim.callFunction(
@@ -87,9 +92,9 @@ export async function MkdirAction(pos: number) {
   UpdateRender();
 }
 
-//
-// touch a file
-//
+/*
+  * touch a file
+  * */
 export async function TouchAction(pos: number) {
   const callback = async (vnode: VNode): Promise<VNode> => {
     const newFileName = (await Store.nvim.callFunction(

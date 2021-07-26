@@ -4,13 +4,12 @@ import Render from './Render';
 import { Store } from './Store';
 import { CreateWindow } from './Window';
 export async function Toggle(nvim: Neovim) {
-  // TODO: check tree buffer is effective.(maybe will be close)
   if (!Store.buffer) {
     const buf = await CreateBuffer(nvim);
     Store.buffer = buf;
   }
   const pwd = await nvim.commandOutput('pwd');
-  if (!Store.pwd || Store.pwd.match(pwd) === null) {
+  if (!Store.pwd || pwd.match(Store.pwd) === null) {
     Store.pwd = pwd;
     Render();
   }

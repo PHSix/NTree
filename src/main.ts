@@ -8,21 +8,25 @@ import {
   RenameAction,
   TouchAction,
 } from './source/Actions';
-import { CreateHighlight, setFlag } from './source/Highlight';
+import { CreateHighlight } from './source/Highlight';
+import { Option } from './source/Option';
 import { Store } from './source/Store';
 import { Toggle } from './source/Toggle';
+
+let loaderFlag = false;
 
 export default function myplugin(plugin: NvimPlugin) {
   plugin.registerCommand(
     'NToggle',
     async () => {
-      if (!Store.cwd){
-        Store.cwd = process.cwd()
+      if (!Store.cwd) {
+        Store.cwd = process.cwd();
       }
       if (!Store.nvim) {
         Store.nvim = plugin.nvim;
       }
-      if (setFlag === false) {
+      if (loaderFlag === false) {
+        Option.hide_file = await plugin.nvim.getVar("node_tree_hide_files") as boolean
         await CreateHighlight(plugin.nvim);
       }
       Store.window = await plugin.nvim.window;

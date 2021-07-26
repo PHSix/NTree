@@ -47,9 +47,9 @@ export async function DFS(
     if (vnode instanceof FolderNode && vnode.isUnfold === true) {
       vnodeArr.splice(0, 0, ...vnode.children);
     }
-    if (Option.hidden_file === false) {
+    if (Option.hide_file === false) {
       counter += 1;
-    } else if (Option.hidden_file === true && vnode.filename[0] !== '.') {
+    } else if (Option.hide_file === true && vnode.filename[0] !== '.') {
       counter += 1;
     }
     if (condition(vnode, counter, pos)) {

@@ -54,10 +54,10 @@ async function hText(ctx: string[]) {
   ]);
 }
 
-//
-// parse VDom
-// @return [string[], HighlightTags]
-//
+/*
+  * parse VDom
+  * @return [string[], HighlightTags]
+  * */
 function ParseVDom(vnode: VNode): [string[], HighlightTag[]] {
   const root_param_length = Store.pwd.split('/').length - 1;
   let depth = 0;
@@ -65,7 +65,7 @@ function ParseVDom(vnode: VNode): [string[], HighlightTag[]] {
   const h_higroup: HighlightTag[] = [];
   const h_text: string[] = [];
   const handleFile = (vfile: FileNode) => {
-    if (Option.hidden_file === true && vfile.filename[0] === '.') {
+    if (Option.hide_file === true && vfile.filename[0] === '.') {
       return;
     }
     const [icon, icon_hi_group] = ParseFileIcon(vfile.filename,vfile.ext);
@@ -83,7 +83,7 @@ function ParseVDom(vnode: VNode): [string[], HighlightTag[]] {
     h_text.push(`${'  '.repeat(depth)} ${icon} ${vfile.filename}`);
   };
   const handleFolder = (vfolder: FolderNode) => {
-    if (Option.hidden_file === true && vfolder.filename[0] === '.') {
+    if (Option.hide_file === true && vfolder.filename[0] === '.') {
       return;
     }
     if (vfolder.path.split('/').length - root_param_length !== depth) {

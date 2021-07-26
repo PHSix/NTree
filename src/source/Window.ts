@@ -13,6 +13,14 @@ export async function setWindowOptions(window: Window): Promise<Window> {
 }
 
 export async function CreateWindow(nvim: Neovim): Promise<Window> {
+  const wins = await nvim.windows;
+  for (let win of wins) {
+    const [, col] = await win.position;
+    if (col === 0) {
+      nvim.setWindow(win);
+    }
+  }
+  await nvim.setOption("splitright", false);
   await nvim.command(`30vsplit`);
   let window = await nvim.window;
   setWindowOptions(window);

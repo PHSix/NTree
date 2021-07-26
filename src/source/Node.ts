@@ -11,7 +11,6 @@ class BaseNode {
 
 export class FileNode extends BaseNode {
   ext: string;
-  // color: string;
   constructor(fname: string, fpath: string, k: symbol = Symbol()) {
     super(fname, fpath, k);
     this.ext = fname.split('.').pop();

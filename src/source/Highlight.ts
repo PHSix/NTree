@@ -1,7 +1,6 @@
 import { Neovim } from 'neovim';
 import { Option } from './Option';
 import { IconStore } from './Icons';
-export let setFlag = false;
 
 export const IconLength = 2;
 
