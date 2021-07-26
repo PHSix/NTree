@@ -4,13 +4,11 @@ import { Option } from './Option';
 import { UpdateRender } from './Render';
 import { Store } from './Store';
 import {
-  DFS,
   UpdateNodeByPos,
   UpdateNodeByFullPath,
   MergeVNode,
 } from './Utils';
 import { closeSync, mkdirSync, openSync, renameSync, statSync } from 'fs';
-import { Log, Logm } from './Tools';
 import { execSync } from 'child_process';
 export async function HiddenAction() {
   Option.hidden_file = !Option.hidden_file;

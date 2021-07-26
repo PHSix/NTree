@@ -16,10 +16,13 @@ export default function myplugin(plugin: NvimPlugin) {
   plugin.registerCommand(
     'NToggle',
     async () => {
+      if (!Store.cwd){
+        Store.cwd = process.cwd()
+      }
       if (!Store.nvim) {
         Store.nvim = plugin.nvim;
       }
-      if (setFlag == false) {
+      if (setFlag === false) {
         await CreateHighlight(plugin.nvim);
       }
       Store.window = await plugin.nvim.window;

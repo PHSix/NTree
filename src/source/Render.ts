@@ -3,7 +3,6 @@ import { Option } from './Option';
 import { ParseVNode } from './Fs';
 import { FileNode, FolderNode, VNode } from './Node';
 import { ParseFileIcon, ParseFolderIcon } from './Icons';
-import { ParseHiName } from './Highlight';
 
 interface HighlightTag {
   line: number;
@@ -69,7 +68,7 @@ function ParseVDom(vnode: VNode): [string[], HighlightTag[]] {
     if (Option.hidden_file === true && vfile.filename[0] === '.') {
       return;
     }
-    const [icon, icon_hi_group] = ParseFileIcon(vfile.ext);
+    const [icon, icon_hi_group] = ParseFileIcon(vfile.filename,vfile.ext);
 
     counter++;
     if (vfile.path.split('/').length - root_param_length !== depth) {

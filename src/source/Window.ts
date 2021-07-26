@@ -1,4 +1,4 @@
-import { Neovim, Window, Buffer } from 'neovim';
+import { Neovim, Window } from 'neovim';
 import { Store } from './Store';
 
 export async function setWindowOptions(window: Window): Promise<Window> {

@@ -9,6 +9,7 @@ export interface InterfaceStore {
   nvim?: Neovim;
   root?: FolderNode;
   textCache?: string[];
+  cwd?: string;
 }
 
 interface KeyMap {

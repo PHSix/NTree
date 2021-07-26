@@ -1,9 +1,7 @@
 import { Store } from './Store';
-import { VNode, FolderNode, FileNode } from './Node';
-import { ParseVNode } from './Fs';
+import { VNode, FolderNode} from './Node';
 import { error } from 'console';
 import { Option } from './Option';
-import { Log, Logm } from './Tools';
 //
 // query node in files tree.
 // @return {[vnode,number]} When 1 is represented node is a file, 0 is represented node is a fold.

@@ -1,7 +1,4 @@
-import { Neovim } from 'neovim';
-import { InterfaceOption } from './TreeType';
-
-function RegisterKeyMap(key: string, value: string) {}
+import { InterfaceOption, KeyMap } from './TreeType';
 
 export let Option: InterfaceOption = {
   hidden_file: true,
@@ -19,7 +16,3 @@ export let Option: InterfaceOption = {
   ],
 };
 
-export function Register(nvim: Neovim){
-  if (nvim.getVar("node_tree_option_hide_file")){
-  }
-}

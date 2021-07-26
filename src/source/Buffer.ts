@@ -1,5 +1,4 @@
 import { Neovim, Buffer } from 'neovim';
-import { Option } from './Option';
 
 export async function CreateBuffer(nvim: Neovim): Promise<Buffer> {
   const buffer = (await nvim.createBuffer(false, true)) as Buffer;

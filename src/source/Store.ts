@@ -1,4 +1,4 @@
 import { InterfaceStore } from './TreeType';
 
-export let Store: InterfaceStore = {};
+export const Store: InterfaceStore = {};
 
