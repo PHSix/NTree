@@ -3,11 +3,7 @@ import { FileNode, FolderNode, VNode } from './Node';
 import { Option } from './Option';
 import { UpdateRender } from './Render';
 import { Store } from './Store';
-import {
-  UpdateNodeByPos,
-  UpdateNodeByFullPath,
-  MergeVNode,
-} from './Utils';
+import { UpdateNodeByPos, UpdateNodeByFullPath, MergeVNode } from './Utils';
 import { closeSync, mkdirSync, openSync, renameSync, statSync } from 'fs';
 import { execSync } from 'child_process';
 export async function HiddenAction() {
