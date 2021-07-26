@@ -13,7 +13,7 @@ export async function UpdateNodeByPos(
   pos: number,
   callback: (vnode: VNode) => Promise<VNode>
 ): Promise<[VNode, VNode]> {
-  const condition = (vnode: VNode, counter: number, pos: number): boolean => {
+  const condition = (_: VNode, counter: number, pos: number): boolean => {
     if (counter === pos) {
       return true;
     }

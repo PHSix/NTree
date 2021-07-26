@@ -19,10 +19,16 @@ interface KeyMap {
 export interface InterfaceOption {
   namespace_id?: number;
   hidden_file: boolean;
-  keymap: KeyMap[];
+  keymaps: KeyMap[];
+  defaultKeyMaps: KeyMap[];
 }
 
 export interface HiGroup {
   hlGroup: string;
   line: number;
+}
+
+export interface Icon {
+  value: string;
+  color: string;
 }

@@ -8,7 +8,10 @@ export async function Toggle(nvim: Neovim) {
   if (!Store.buffer) {
     const buf = await CreateBuffer(nvim);
     Store.buffer = buf;
-    Store.pwd = await nvim.commandOutput('pwd');
+  }
+  const pwd = await nvim.commandOutput('pwd');
+  if (!Store.pwd || Store.pwd.match(pwd) === null) {
+    Store.pwd = pwd;
     Render();
   }
   // NOTE: Achieved close window and open window;

@@ -4,34 +4,36 @@ import {
   EditAction,
   HiddenAction,
   MkdirAction,
+  RemoveAction,
   RenameAction,
   TouchAction,
 } from './source/Actions';
-import { CreateHighlight } from './source/Highlight';
+import { CreateHighlight, setFlag } from './source/Highlight';
 import { Store } from './source/Store';
 import { Toggle } from './source/Toggle';
-import { Log } from './source/Tools';
 
 export default function myplugin(plugin: NvimPlugin) {
   plugin.registerCommand(
     'NToggle',
     async () => {
-      const d = Date.now();
-      Store.nvim = plugin.nvim;
-      await CreateHighlight(plugin.nvim);
+      if (!Store.nvim) {
+        Store.nvim = plugin.nvim;
+      }
+      if (setFlag == false) {
+        await CreateHighlight(plugin.nvim);
+      }
+      Store.window = await plugin.nvim.window;
       await Toggle(plugin.nvim);
-      await Log(`${Date.now() - d} ms`);
     },
-    { sync: false }
+    { sync: true }
   );
-  plugin.registerCommand('TestCommand', async () => {}, { sync: false });
   plugin.registerFunction(
     'NodeTreeAction',
     async (args: object) => {
       const [cursorPos, _] = await plugin.nvim.window.cursor;
       switch (args.toString()) {
         case 'edit':
-          EditAction(cursorPos);
+          await EditAction(cursorPos);
           break;
         case 'dirUp':
           DirUpAction(cursorPos);
@@ -48,13 +50,13 @@ export default function myplugin(plugin: NvimPlugin) {
         case 'hide':
           HiddenAction();
           break;
+        case 'delete':
+          RemoveAction(cursorPos);
+          break;
       }
     },
     {
       sync: false,
     }
   );
-  plugin.registerFunction('RegisterNodeTree', async (args: object) => {}, {
-    sync: false,
-  });
 }

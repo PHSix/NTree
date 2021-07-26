@@ -11,6 +11,7 @@ import {
 } from './Utils';
 import { closeSync, mkdirSync, openSync, renameSync, statSync } from 'fs';
 import { Log, Logm } from './Tools';
+import { execSync } from 'child_process';
 export async function HiddenAction() {
   Option.hidden_file = !Option.hidden_file;
   UpdateRender();
@@ -141,6 +142,36 @@ export async function RenameAction(pos: number) {
     return vnode;
   };
   const [, vnode] = await UpdateNodeByPos(pos, callback);
+  const updeteNodePath = `${vnode.path}`;
+  const newNode = await ParseVNode(updeteNodePath);
+  const callback2 = async (vnode: VNode): Promise<VNode> => {
+    (vnode as FolderNode).children = MergeVNode(
+      (vnode as FolderNode).children,
+      (newNode as FolderNode).children
+    );
+    return vnode;
+  };
+  await UpdateNodeByFullPath(newNode, callback2);
+  UpdateRender();
+}
+export async function RemoveAction(pos: number) {
+  let ct = false;
+  const callback = async (vnode: VNode): Promise<VNode> => {
+    const isDelete = (await Store.nvim.callFunction(
+      'input',
+      `Do you want to delete: ${vnode.path}/${vnode.filename} ? [Y/n]`
+    )) as string;
+    if (isDelete.length === 0 || isDelete === 'y' || isDelete === 'Y') {
+      execSync(`rm -rf ${vnode.path}/${vnode.filename}`);
+      ct = true;
+    }
+    return vnode;
+  };
+
+  const [, vnode] = await UpdateNodeByPos(pos, callback);
+  if (ct === false) {
+    return;
+  }
   const updeteNodePath = `${vnode.path}`;
   const newNode = await ParseVNode(updeteNodePath);
   const callback2 = async (vnode: VNode): Promise<VNode> => {

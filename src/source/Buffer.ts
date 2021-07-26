@@ -4,17 +4,13 @@ import { Option } from './Option';
 export async function CreateBuffer(nvim: Neovim): Promise<Buffer> {
   const buffer = (await nvim.createBuffer(false, true)) as Buffer;
   setBufferOptions(buffer);
-  // DefineHi(nvim);
   mapKeys(buffer);
-  if (!Option.namespace_id) {
-    //   await CreateNameSpace(nvim);
-  }
   return buffer;
 }
 
 async function setBufferOptions(buffer: Buffer): Promise<Buffer> {
   await Promise.all([
-    buffer.setOption('filetype', 'LightTree'),
+    buffer.setOption('filetype', 'NodeTree'),
     buffer.setOption('modifiable', false),
     buffer.setOption('buflisted', false),
   ]);
@@ -41,8 +37,9 @@ async function mapKeys(buffer: Buffer) {
   mapQueue.push(map('cn', ":call NodeTreeAction('touch')<CR>"));
   mapQueue.push(map('mk', ":call NodeTreeAction('mkdir')<CR>"));
   mapQueue.push(map('q', ':q<CR>'));
-  mapQueue.push(map('r', ":call NodeTreeAction('refresh')<CR>"));
+  // mapQueue.push(map('r', ":call NodeTreeAction('refresh')<CR>"));
   mapQueue.push(map('zh', ":call NodeTreeAction('hide')<CR>"));
   mapQueue.push(map('rn', ":call NodeTreeAction('rename')<CR>"));
+  mapQueue.push(map('dd', ":call NodeTreeAction('delete')<CR>"));
   await Promise.all<void>(mapQueue);
 }

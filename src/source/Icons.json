@@ -1,0 +1,438 @@
+{
+  "ai": {
+    "value": "",
+    "color": "#F16529"
+  },
+  "awk": {
+    "value": "",
+    "color": "#FFFFFF"
+  },
+  "bash": {
+    "value": "",
+    "color": "#834F79"
+  },
+  "bat": {
+    "value": "",
+    "color": "#FFFFFF"
+  },
+  "bmp": {
+    "value": "",
+    "color": "#3AFFDB"
+  },
+  "c": {
+    "value": "",
+    "color": "#689FB6"
+  },
+  "c++": {
+    "value": "",
+    "color": "#689FB6"
+  },
+  "cc": {
+    "value": "",
+    "color": "#689FB6"
+  },
+  "clj": {
+    "value": "",
+    "color": "#8FAA54"
+  },
+  "cljc": {
+    "value": "",
+    "color": "#8FAA54"
+  },
+  "cljs": {
+    "value": "",
+    "color": "#8FAA54"
+  },
+  "coffee": {
+    "value": "",
+    "color": "#905532"
+  },
+  "conf": {
+    "value": "",
+    "color": "#FFFFFF"
+  },
+  "cp": {
+    "value": "",
+    "color": "#689FB6"
+  },
+  "cpp": {
+    "value": "",
+    "color": "#689FB6"
+  },
+  "cs": {
+    "value": "",
+    "color": "#689FB6"
+  },
+  "csh": {
+    "value": "",
+    "color": "#FFFFFF"
+  },
+  "css": {
+    "value": "",
+    "color": "#689FB6"
+  },
+  "cxx": {
+    "value": "",
+    "color": "#689FB6"
+  },
+  "d": {
+    "value": "",
+    "color": "#AE403F"
+  },
+  "dart": {
+    "value": "",
+    "color": "#689FB6"
+  },
+  "db": {
+    "value": "",
+    "color": "#689FB6"
+  },
+  "diff": {
+    "value": "",
+    "color": "#FFFFFF"
+  },
+  "dump": {
+    "value": "",
+    "color": "#689FB6"
+  },
+  "edn": {
+    "value": "",
+    "color": "#8FAA54"
+  },
+  "eex": {
+    "value": "",
+    "color": "#834F79"
+  },
+  "ejs": {
+    "value": "",
+    "color": "#F09F17"
+  },
+  "elm": {
+    "value": "",
+    "color": "#FFFFFF"
+  },
+  "erl": {
+    "value": "",
+    "color": "#834F79"
+  },
+  "ex": {
+    "value": "",
+    "color": "#834F79"
+  },
+  "exs": {
+    "value": "",
+    "color": "#834F79"
+  },
+  "f#": {
+    "value": "",
+    "color": "#44788E"
+  },
+  "fish": {
+    "value": "",
+    "color": "#8FAA54"
+  },
+  "fs": {
+    "value": "",
+    "color": "#689FB6"
+  },
+  "fsi": {
+    "value": "",
+    "color": "#689FB6"
+  },
+  "fsscript": {
+    "value": "",
+    "color": "#689FB6"
+  },
+  "fsx": {
+    "value": "",
+    "color": "#689FB6"
+  },
+  "gif": {
+    "value": "",
+    "color": "#3AFFDB"
+  },
+  "go": {
+    "value": "",
+    "color": "#F5C06F"
+  },
+  "h": {
+    "value": "",
+    "color": "#689FB6"
+  },
+  "hbs": {
+    "value": "",
+    "color": "#D4843E"
+  },
+  "hh": {
+    "value": "",
+    "color": "#689FB6"
+  },
+  "hpp": {
+    "value": "",
+    "color": "#689FB6"
+  },
+  "hrl": {
+    "value": "",
+    "color": "#CB6F6F"
+  },
+  "hs": {
+    "value": "",
+    "color": "#F5C06F"
+  },
+  "htm": {
+    "value": "",
+    "color": "#F16529"
+  },
+  "html": {
+    "value": "",
+    "color": "#F16529"
+  },
+  "hxx": {
+    "value": "",
+    "color": "#689FB6"
+  },
+  "ico": {
+    "value": "",
+    "color": "#3AFFDB"
+  },
+  "ini": {
+    "value": "",
+    "color": "#FFFFFF"
+  },
+  "java": {
+    "value": "",
+    "color": "#834F79"
+  },
+  "jl": {
+    "value": "",
+    "color": "#9558B2"
+  },
+  "jpeg": {
+    "value": "",
+    "color": "#3AFFDB"
+  },
+  "jpg": {
+    "value": "",
+    "color": "#3AFFDB"
+  },
+  "js": {
+    "value": "",
+    "color": "#F5C06F"
+  },
+  "json": {
+    "value": "",
+    "color": "#F5C06F"
+  },
+  "jsx": {
+    "value": "",
+    "color": "#689FB6"
+  },
+  "ksh": {
+    "value": "",
+    "color": "#FFFFFF"
+  },
+  "leex": {
+    "value": "",
+    "color": "#FFFFFF"
+  },
+  "less": {
+    "value": "",
+    "color": "#44788E"
+  },
+  "lhs": {
+    "value": "",
+    "color": "#F5C06F"
+  },
+  "lua": {
+    "value": "",
+    "color": "#834F79"
+  },
+  "markdown": {
+    "value": "",
+    "color": "#F09F17"
+  },
+  "md": {
+    "value": "",
+    "color": "#F09F17"
+  },
+  "mdx": {
+    "value": "",
+    "color": "#F09F17"
+  },
+  "mjs": {
+    "value": "",
+    "color": "#F5C06F"
+  },
+  "ml": {
+    "value": "λ",
+    "color": "#F09F17"
+  },
+  "mli": {
+    "value": "λ",
+    "color": "#F09F17"
+  },
+  "mustache": {
+    "value": "",
+    "color": "#D4843E"
+  },
+  "php": {
+    "value": "",
+    "color": "#834F79"
+  },
+  "pl": {
+    "value": "",
+    "color": "#689FB6"
+  },
+  "pm": {
+    "value": "",
+    "color": "#689FB6"
+  },
+  "png": {
+    "value": "",
+    "color": "#3AFFDB"
+  },
+  "pp": {
+    "value": "",
+    "color": "#FFFFFF"
+  },
+  "ps1": {
+    "value": "",
+    "color": "#689FB6"
+  },
+  "psb": {
+    "value": "",
+    "color": "#44788E"
+  },
+  "psd": {
+    "value": "",
+    "color": "#44788E"
+  },
+  "py": {
+    "value": "",
+    "color": "#F09F17"
+  },
+  "pyc": {
+    "value": "",
+    "color": "#F09F17"
+  },
+  "pyd": {
+    "value": "",
+    "color": "#F09F17"
+  },
+  "pyo": {
+    "value": "",
+    "color": "#F09F17"
+  },
+  "rb": {
+    "value": "",
+    "color": "#AE403F"
+  },
+  "rlib": {
+    "value": "",
+    "color": "#F16529"
+  },
+  "rmd": {
+    "value": "",
+    "color": "#F09F17"
+  },
+  "rs": {
+    "value": "",
+    "color": "#F16529"
+  },
+  "rss": {
+    "value": "",
+    "color": "#F16529"
+  },
+  "sass": {
+    "value": "",
+    "color": "#CB6F6F"
+  },
+  "scala": {
+    "value": "",
+    "color": "#AE403F"
+  },
+  "scss": {
+    "value": "",
+    "color": "#CB6F6F"
+  },
+  "sh": {
+    "value": "",
+    "color": "#834F79"
+  },
+  "slim": {
+    "value": "",
+    "color": "#D4843E"
+  },
+  "sln": {
+    "value": "",
+    "color": "#834F79"
+  },
+  "sql": {
+    "value": "",
+    "color": "#44788E"
+  },
+  "styl": {
+    "value": "",
+    "color": "#8FAA54"
+  },
+  "suo": {
+    "value": "",
+    "color": "#834F79"
+  },
+  "swift": {
+    "value": "",
+    "color": "#D4843E"
+  },
+  "t": {
+    "value": "",
+    "color": "#689FB6"
+  },
+  "toml": {
+    "value": "",
+    "color": "#FFFFFF"
+  },
+  "ts": {
+    "value": "",
+    "color": "#689FB6"
+  },
+  "tsx": {
+    "value": "",
+    "color": "#689FB6"
+  },
+  "twig": {
+    "value": "",
+    "color": "#8FAA54"
+  },
+  "vim": {
+    "value": "",
+    "color": "#8FAA54"
+  },
+  "vue": {
+    "value": "﵂",
+    "color": "#42B883"
+  },
+  "webp": {
+    "value": "",
+    "color": "#3AFFDB"
+  },
+  "xcplayground": {
+    "value": "",
+    "color": "#D4843E"
+  },
+  "xul": {
+    "value": "",
+    "color": "#F16529"
+  },
+  "yaml": {
+    "value": "",
+    "color": "#FFFFFF"
+  },
+  "yml": {
+    "value": "",
+    "color": "#FFFFFF"
+  },
+  "zsh": {
+    "value": "",
+    "color": "#FFFFFF"
+  }
+}

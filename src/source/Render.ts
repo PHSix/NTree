@@ -3,47 +3,44 @@ import { Option } from './Option';
 import { ParseVNode } from './Fs';
 import { FileNode, FolderNode, VNode } from './Node';
 import { ParseFileIcon, ParseFolderIcon } from './Icons';
+import { ParseHiName } from './Highlight';
 
-interface HighlightTags {
-  counter: number;
-  lines: number[];
+interface HighlightTag {
+  line: number;
+  start: number;
+  end: number;
+  group: string;
 }
 
 export default async function Render() {
   Store.root = (await ParseVNode(Store.pwd)) as FolderNode;
   const [h_text, h_higroup] = ParseVDom(Store.root);
+  await h(h_text, h_higroup);
   Store.textCache = h_text;
-  h(h_text, h_higroup);
 }
 
 export async function UpdateRender() {
   const [h_text, h_higroup] = ParseVDom(Store.root);
+  await h(h_text, h_higroup);
   Store.textCache = h_text;
-  h(h_text, h_higroup);
+}
+
+function defineHighlight(h_higroup: HighlightTag[]) {
+  for (let hi of h_higroup) {
+    Store.buffer.addHighlight({
+      hlGroup: hi.group,
+      line: hi.line,
+      colStart: hi.start,
+      colEnd: hi.end,
+      srcId: Option.namespace_id,
+    });
+  }
 }
 
 // NOTE: Can not use promise all to render highlight rules and text.
-async function h(ctx: string[], h_higroup: HighlightTags) {
-  // await Promise.all<void>([defineHighlight(h_higroup), hText(ctx)]);
-  await hText(ctx).then(() => defineHighlight(h_higroup));
-}
-
-async function defineHighlight(h_higroup: HighlightTags) {
-  const hi_queue: Promise<void>[] = [];
-  h_higroup.lines.forEach((line) => {
-    hi_queue.push(defineGroup('BufferLineError', line));
-  });
-  Promise.all(hi_queue);
-}
-
-async function defineGroup(hlGroup: string, line: number) {
-  await Store.buffer.addHighlight({
-    hlGroup,
-    line,
-    colStart: 0,
-    colEnd: -1,
-    srcId: Option.namespace_id,
-  });
+async function h(ctx: string[], h_higroup: HighlightTag[]) {
+  await hText(ctx);
+  defineHighlight(h_higroup);
 }
 
 async function hText(ctx: string[]) {
@@ -62,57 +59,74 @@ async function hText(ctx: string[]) {
 // parse VDom
 // @return [string[], HighlightTags]
 //
-function ParseVDom(vnode: VNode): [string[], HighlightTags] {
+function ParseVDom(vnode: VNode): [string[], HighlightTag[]] {
   const root_param_length = Store.pwd.split('/').length - 1;
-  const h_higroup: HighlightTags = {
-    counter: 0,
-    lines: [],
-  };
+  let depth = 0;
+  let counter = 0;
+  const h_higroup: HighlightTag[] = [];
   const h_text: string[] = [];
   const handleFile = (vfile: FileNode) => {
     if (Option.hidden_file === true && vfile.filename[0] === '.') {
       return;
     }
-    h_higroup.counter++;
-    h_text.push(
-      `${'  '.repeat(
-        vfile.path.split('/').length - root_param_length
-      )} ${ParseFileIcon(vfile.ext)} ${vfile.filename}`
-    );
+    const [icon, icon_hi_group] = ParseFileIcon(vfile.ext);
+
+    counter++;
+    if (vfile.path.split('/').length - root_param_length !== depth) {
+      depth = vfile.path.split('/').length - root_param_length;
+    }
+    h_higroup.push({
+      line: counter - 1,
+      start: depth * 2 + 1,
+      end: depth * 2 + 4,
+      group: icon_hi_group,
+    });
+    h_text.push(`${'  '.repeat(depth)} ${icon} ${vfile.filename}`);
   };
   const handleFolder = (vfolder: FolderNode) => {
     if (Option.hidden_file === true && vfolder.filename[0] === '.') {
       return;
     }
-    h_higroup.counter++;
-    h_higroup.lines.push(h_higroup.counter - 1);
+    if (vfolder.path.split('/').length - root_param_length !== depth) {
+      depth = vfolder.path.split('/').length - root_param_length;
+    }
+    h_higroup.push({
+      line: counter,
+      start: 0,
+      end: -1,
+      group: 'NodeTreeFolder',
+    });
+    counter++;
     h_text.push(
-      `${'  '.repeat(
-        vfolder.path.split('/').length - root_param_length
-      )} ${ParseFolderIcon(vfolder.filename, vfolder.isUnfold)} ${
-        vfolder.filename
-      }`
+      `${'  '.repeat(depth)} ${ParseFolderIcon(
+        vfolder.filename,
+        vfolder.isUnfold
+      )} ${vfolder.filename}`
     );
   };
-  DFS(vnode, handleFile, handleFolder);
+  IteratorDFS(vnode, handleFile, handleFolder);
   return [h_text, h_higroup];
 }
 
-function DFS(
+function IteratorDFS(
   vnode: VNode,
   hfile: (vfile: FileNode) => void,
   hfolder: (vfolder: FolderNode) => void
 ) {
-  if (vnode instanceof FolderNode) {
-    hfolder(vnode);
-    if (vnode.isUnfold === true) {
-      for (let childVNode of vnode.children) {
-        DFS(childVNode, hfile, hfolder);
+  const vnodeArr: VNode[] = [];
+  while (true) {
+    if (vnode instanceof FolderNode) {
+      hfolder(vnode);
+      if (vnode.isUnfold === true) {
+        vnodeArr.splice(0, 0, ...vnode.children);
       }
+    } else {
+      hfile(vnode);
     }
-    return;
-  } else {
-    hfile(vnode);
-    return;
+    if (vnodeArr.length === 0) {
+      break;
+    }
+    vnode = vnodeArr.shift();
   }
+  return [];
 }
