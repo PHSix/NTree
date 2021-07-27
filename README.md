@@ -80,4 +80,9 @@ support actions.
 | delete | dd        | delete a file                                              |
 | hide   | zh        | Toggle hide dotfile or not                                 |
 
+# TODO
+- [ ] git status support
+- [ ] float window show keymap
+- [ ] cut file action
+- [ ] vsplit and split window to view
 
