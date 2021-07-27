@@ -4,6 +4,11 @@ NodeTree is a remote plugin of files tree for neovim.
 
 It was wrote in typescript and run on nodejs.
 
+# Dependenies
+- nodejs
+- neovim
+- [patch font](https://nerdfonts.com) (Need a patch font to right to display file icon.)
+
 #Inspried
 
 - neovim-remote-plugin
@@ -74,3 +79,5 @@ support actions.
 | edit   | [o, <cr>] | If target is a file, NodeTree will open, folder as toggle. |
 | delete | dd        | delete a file                                              |
 | hide   | zh        | Toggle hide dotfile or not                                 |
+
+
