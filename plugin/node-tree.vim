@@ -29,36 +29,30 @@ const s:dirname = expand("<sfile>:h:h")
 
 if executable("yarn")==1
   let s:package_tool = "yarn"
+  let s:install_dep_cmd = s:package_tool
+  let s:build_source = printf("%s build", s:package_tool)
 elseif executable("cnpm")==1
   let s:package_tool = "cnpm"
+  let s:install_dep_cmd = printf("%s install", s:package_tool)
 elseif executable("npm")==1
   let s:package_tool = "npm"
+  let s:install_dep_cmd = printf("%s install", s:package_tool)
+  let s:build_source = printf("%s run build", s:package_tool)
 else
   echoerr "Dont has package manager!"
   finish
 endif
 
-if s:package_tool == "yarn"
-  let s:install_dep_cmd = s:package_tool
-else
-  let s:install_dep_cmd = printf("%s install", s:package_tool)
-endif
-
-if s:package_tool == "yarn"
-  let s:build_source = printf("%s build", s:package_tool)
-else
-  let s:build_source = printf("%s run build", s:package_tool)
-endif
-let s:install_dep_cmd = printf("cd %s && %s", s:dirname, s:install_dep_cmd)
 " Auto install dependencies
 if isdirectory(printf("%s/node_modules", s:dirname)) == 0
+  let s:install_dep_cmd = printf("cd %s && %s", s:dirname, s:install_dep_cmd)
   echom "[ NodeTree ]: Installing dependencies..."
   call system(s:install_dep_cmd)
   echom "[ NodeTree ]: Has insalled dependencies..."
 endif
-let s:build_source = printf("cd %s && %s", s:dirname, s:build_source)
 " Auto build typescript source to javascript
 if isdirectory(printf("%s/out", s:dirname)) == 0
+  let s:build_source = printf("cd %s && %s", s:dirname, s:build_source)
   echom "[ NodeTree ]: Building source..."
   call system(s:build_source)
   echom "[ NodeTree ]: Build complete!"
