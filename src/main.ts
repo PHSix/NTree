@@ -26,7 +26,9 @@ export default function myplugin(plugin: NvimPlugin) {
         Store.nvim = plugin.nvim;
       }
       if (loaderFlag === false) {
-        Option.hide_file = await plugin.nvim.getVar("node_tree_hide_files") as boolean
+        Option.hide_file = (await plugin.nvim.getVar(
+          'node_tree_hide_files'
+        )) as boolean;
         await CreateHighlight(plugin.nvim);
       }
       Store.window = await plugin.nvim.window;
@@ -59,6 +61,9 @@ export default function myplugin(plugin: NvimPlugin) {
           break;
         case 'delete':
           RemoveAction(cursorPos);
+          break;
+        case 'quit':
+          plugin.nvim.command('q');
           break;
       }
     },

@@ -3,16 +3,22 @@ if exists('g:node_tree_loaded') == 1
 endif
 
 let g:node_tree_loaded = 1
-let g:node_tree_map = {
-      \ "dirUp": "u",
-      \ "touch": "cn",
-      \ "mkdir": "mk",
-      \ "rename": "rn",
-      \ "delete": "dd",
-      \ "hide": "zh",
-      \"edit": ["o", "<CR>"]
-      \}
-let g:node_tree_hide_files = v:true
+if exists('g:node_tree_map') == 0
+  let g:node_tree_map = {
+        \ "dirUp": "u",
+        \ "touch": "cn",
+        \ "mkdir": "mk",
+        \ "rename": "rn",
+        \ "delete": "dd",
+        \ "hide": "zh",
+        \ "edit": ["o", "<CR>"],
+        \ "quit": 'q',
+        \}
+endif
+
+if exists("g:node_tree_hide_files") == 0
+  let g:node_tree_hide_files = v:true
+endif
 " Check system has nodejs ?
 if executable("node") == 0
   echoerr "Please check your computer has install nodejs..."
@@ -59,10 +65,11 @@ if isdirectory(printf("%s/out", s:dirname)) == 0
 endif
 
 " Aim to close NodeTree window when the whole screen has only a window.
-function! s:node_tree_close()
+function! s:node_tree_autodo()
   if &filetype=="NodeTree" && len(nvim_list_wins()) == 1
     :q
   endif
+  setlocal cursorline
 endfunction
 
 function! NodeTreeMap()
@@ -82,7 +89,7 @@ function! s:node_tree_map()
 endfunction
 
 augroup NodeTreeAugroup
-  autocmd BufEnter * call s:node_tree_close()
+  autocmd BufEnter * call s:node_tree_autodo()
   autocmd FileType NodeTree call s:node_tree_map()
 augroup END
 
@@ -90,3 +97,4 @@ call remote#host#RegisterPlugin('node', s:dirname, [
       \ {'sync': v:false, 'name': 'NToggle', 'type': 'command', 'opts': {}},
       \ {'sync': v:false, 'name': 'NodeTreeAction', 'type': 'function', 'opts': {}},
       \ ])
+
