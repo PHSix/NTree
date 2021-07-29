@@ -20,6 +20,8 @@ export async function CreateHighlight(nvim: Neovim) {
 
   await Promise.all<any>([
     nvim.command('highlight NodeTreeFolder guifg=#c7ecee'),
+    nvim.command('highlight NodeTreeGitAdd guifg=#3ae374'),
+    nvim.command('highlight NodeTreeGitMod guifg=#82ccdd'),
     ...hi_queue,
   ]);
 }
