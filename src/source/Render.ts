@@ -3,6 +3,7 @@ import { Option } from './Option';
 import { ParseVNode } from './Fs';
 import { FileNode, FolderNode, VNode } from './Node';
 import { ParseFileIcon, ParseFolderIcon } from './Icons';
+import { getVNodeGitStatus } from './Git';
 
 interface HighlightTag {
   line: number;
@@ -11,13 +12,29 @@ interface HighlightTag {
   group: string;
 }
 
+interface GitTag {
+  line: number;
+  event: string;
+}
+
 export async function Render() {
   if (!Store.root) {
     Store.root = (await ParseVNode(Store.pwd)) as FolderNode;
   }
-  const [h_text, h_higroup] = ParseVDom(Store.root);
-  await h(h_text, h_higroup);
+  const [h_text, h_higroup, h_gitgroup] = await ParseVDom(Store.root);
+  await h(h_text, h_higroup, h_gitgroup);
   Store.textCache = h_text;
+}
+
+// NOTE: Can not use promise all to render highlight rules and text.
+async function h(
+  ctx: string[],
+  h_higroup: HighlightTag[],
+  h_gitgroup: GitTag[]
+) {
+  await hText(ctx);
+  defineHighlight(h_higroup);
+  setGitVirtualText(h_gitgroup);
 }
 
 function defineHighlight(h_higroup: HighlightTag[]) {
@@ -32,10 +49,18 @@ function defineHighlight(h_higroup: HighlightTag[]) {
   }
 }
 
-// NOTE: Can not use promise all to render highlight rules and text.
-async function h(ctx: string[], h_higroup: HighlightTag[]) {
-  await hText(ctx);
-  defineHighlight(h_higroup);
+function setGitVirtualText(h_gitgroup: GitTag[]) {
+  for (let hi of h_gitgroup) {
+    let hi_group:string;
+    if (hi.event.match('A')) {
+      hi_group = 'NodeTreeGitAdd';
+    } else {
+      hi_group = 'NodeTreeGitMod';
+    }
+    Store.buffer.setVirtualText(Option.namespace_id, hi.line, [
+      [hi.event, hi_group],
+    ]);
+  }
 }
 
 async function hText(ctx: string[]) {
@@ -54,13 +79,20 @@ async function hText(ctx: string[]) {
  * parse VDom
  * @return [string[], HighlightTags]
  * */
-function ParseVDom(vnode: VNode): [string[], HighlightTag[]] {
+async function ParseVDom(
+  vnode: VNode
+): Promise<[string[], HighlightTag[], GitTag[]]> {
   const root_param_length = Store.pwd.split('/').length - 1;
   let depth = 0;
   let counter = 0;
+  const git_queue: Promise<string>[] = [];
+  const h_gitgroup: GitTag[] = [];
   const h_higroup: HighlightTag[] = [];
   const h_text: string[] = [];
   const handleFile = (vfile: FileNode) => {
+    // TODO: Get git status
+    git_queue.push(getVNodeGitStatus(vfile.path, vfile.filename));
+
     if (Option.hide_file === true && vfile.filename[0] === '.') {
       return;
     }
@@ -79,6 +111,9 @@ function ParseVDom(vnode: VNode): [string[], HighlightTag[]] {
     h_text.push(`${'  '.repeat(depth)} ${icon} ${vfile.filename}`);
   };
   const handleFolder = (vfolder: FolderNode) => {
+    // TODO: Get git status
+    git_queue.push(getVNodeGitStatus(vfolder.path, vfolder.filename));
+
     if (Option.hide_file === true && vfolder.filename[0] === '.') {
       return;
     }
@@ -100,7 +135,14 @@ function ParseVDom(vnode: VNode): [string[], HighlightTag[]] {
     );
   };
   IteratorDFS(vnode, handleFile, handleFolder);
-  return [h_text, h_higroup];
+  await Promise.all<string>(git_queue).then((result) => {
+    result.forEach((git, index) => {
+      if (git.length !== 0) {
+        h_gitgroup.push({ line: index, event: git });
+      }
+    });
+  });
+  return [h_text, h_higroup, h_gitgroup];
 }
 
 function IteratorDFS(

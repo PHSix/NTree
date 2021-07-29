@@ -919,14 +919,6 @@ export const IconStore = {
   },
 };
 
-//
-// export let Icons = {
-//   cursorToRight: '►',
-//   cursorToDown: '▼',
-//   foldOpen: '',
-//   foldClose: '',
-// };
-
 export function ParseFileIcon(filename: string, ext: string): [string, string] {
   if (IconStore[filename]) {
     return [IconStore[filename].icon, ParseHiName(IconStore[filename].name)];
