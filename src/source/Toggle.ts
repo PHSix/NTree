@@ -1,6 +1,6 @@
 import { Neovim } from 'neovim';
 import { CreateBuffer } from './Buffer';
-import Render from './Render';
+import {Render} from './Render';
 import { Store } from './Store';
 import { CreateWindow } from './Window';
 export async function Toggle(nvim: Neovim) {

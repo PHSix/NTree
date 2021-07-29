@@ -1,21 +1,21 @@
 import { ParseVNode } from './Fs';
 import { FileNode, FolderNode, VNode } from './Node';
 import { Option } from './Option';
-import { UpdateRender } from './Render';
+import { Render } from './Render';
 import { Store } from './Store';
 import { UpdateNodeByPos, UpdateNodeByFullPath, MergeVNode } from './Utils';
 import { closeSync, mkdirSync, openSync, renameSync, statSync } from 'fs';
 import { execSync } from 'child_process';
 export async function HiddenAction() {
   Option.hide_file = !Option.hide_file;
-  UpdateRender();
+  Render();
 }
 
 /*
-  * edit a node.                       
-  * if file to edit in current window.
-  * if fold node will unfold or fold.
-  * */
+ * edit a node.
+ * if file to edit in current window.
+ * if fold node will unfold or fold.
+ * */
 export async function EditAction(pos: number) {
   const callback = async (vnode: VNode): Promise<VNode> => {
     if (vnode instanceof FileNode) {
@@ -38,16 +38,13 @@ export async function EditAction(pos: number) {
     Store.nvim.setWindow(Store.window);
     Store.nvim.command(`:e ${vnode.path}/${vnode.filename}`);
   } else {
-    UpdateRender();
+    Render();
   }
 }
 
-
 /*
-  * set the pwd to higher level root
-  * */
-
-
+ * set the pwd to higher level root
+ * */
 
 export async function DirUpAction(_: number) {
   Store.pwd = Store.pwd.slice(
@@ -59,28 +56,32 @@ export async function DirUpAction(_: number) {
   newNode.children = MergeVNode([Store.root], newNode.children);
 
   Store.root = newNode;
-  UpdateRender();
+  Render();
 }
 
 /*
-  * make a directory
-  * */
+ * make a directory
+ * */
 export async function MkdirAction(pos: number) {
+  let createPath = '';
   const callback = async (vnode: VNode): Promise<VNode> => {
+    createPath = `${vnode.path}`;
+    if (vnode instanceof FolderNode && vnode.isUnfold === true) {
+      createPath = `${vnode.path}/${vnode.filename}`;
+    }
     const newDir = (await Store.nvim.callFunction(
       'input',
-      `Make a directory: ${vnode.path}/`
+      `Make a directory: ${createPath}/`
     )) as string;
     if (newDir.length === 0) {
       return;
     }
-    mkdirSync(`${vnode.path}/${newDir}`);
+    mkdirSync(`${createPath}/${newDir}`);
 
     return vnode;
   };
-  const [, vnode] = await UpdateNodeByPos(pos, callback);
-  const updeteNodePath = `${vnode.path}`;
-  const newNode = await ParseVNode(updeteNodePath);
+  await UpdateNodeByPos(pos, callback);
+  const newNode = await ParseVNode(createPath);
   const callback2 = async (vnode: VNode): Promise<VNode> => {
     (vnode as FolderNode).children = MergeVNode(
       (vnode as FolderNode).children,
@@ -89,31 +90,36 @@ export async function MkdirAction(pos: number) {
     return vnode;
   };
   await UpdateNodeByFullPath(newNode, callback2);
-  UpdateRender();
+  Render();
 }
 
 /*
-  * touch a file
-  * */
+ * touch a file
+ * */
 export async function TouchAction(pos: number) {
+  let createPath = '';
   const callback = async (vnode: VNode): Promise<VNode> => {
-    const newFileName = (await Store.nvim.callFunction(
+    createPath = `${vnode.path}`;
+    if (vnode instanceof FolderNode && vnode.isUnfold === true) {
+      createPath = `${vnode.path}/${vnode.filename}`;
+    }
+    const touchFileName = (await Store.nvim.callFunction(
       'input',
-      `Touch a file: ${vnode.path}/`
+      `Touch a file: ${createPath}/`
     )) as string;
-    if (newFileName.length === 0) {
+    if (touchFileName.length === 0) {
       return;
     }
     try {
-      statSync(`${vnode.path}/${newFileName}`);
+      statSync(`${createPath}/${touchFileName}`);
     } catch (err) {
-      closeSync(openSync(`${vnode.path}/${newFileName}`, 'w'));
+      closeSync(openSync(`${createPath}/${touchFileName}`, 'w'));
     }
     return vnode;
   };
-  const [, vnode] = await UpdateNodeByPos(pos, callback);
-  const updeteNodePath = `${vnode.path}`;
-  const newNode = await ParseVNode(updeteNodePath);
+  await UpdateNodeByPos(pos, callback);
+  const newNode = await ParseVNode(createPath);
+  Store.nvim.outWrite(createPath + ' | ' + newNode.path + '\n');
   const callback2 = async (vnode: VNode): Promise<VNode> => {
     (vnode as FolderNode).children = MergeVNode(
       (vnode as FolderNode).children,
@@ -122,7 +128,7 @@ export async function TouchAction(pos: number) {
     return vnode;
   };
   await UpdateNodeByFullPath(newNode, callback2);
-  UpdateRender();
+  Render();
 }
 
 export async function RenameAction(pos: number) {
@@ -151,7 +157,7 @@ export async function RenameAction(pos: number) {
     return vnode;
   };
   await UpdateNodeByFullPath(newNode, callback2);
-  UpdateRender();
+  Render();
 }
 export async function RemoveAction(pos: number) {
   let ct = false;
@@ -181,5 +187,5 @@ export async function RemoveAction(pos: number) {
     return vnode;
   };
   await UpdateNodeByFullPath(newNode, callback2);
-  UpdateRender();
+  Render();
 }

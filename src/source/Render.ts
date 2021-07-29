@@ -11,14 +11,10 @@ interface HighlightTag {
   group: string;
 }
 
-export default async function Render() {
-  Store.root = (await ParseVNode(Store.pwd)) as FolderNode;
-  const [h_text, h_higroup] = ParseVDom(Store.root);
-  await h(h_text, h_higroup);
-  Store.textCache = h_text;
-}
-
-export async function UpdateRender() {
+export async function Render() {
+  if (!Store.root) {
+    Store.root = (await ParseVNode(Store.pwd)) as FolderNode;
+  }
   const [h_text, h_higroup] = ParseVDom(Store.root);
   await h(h_text, h_higroup);
   Store.textCache = h_text;
@@ -55,9 +51,9 @@ async function hText(ctx: string[]) {
 }
 
 /*
-  * parse VDom
-  * @return [string[], HighlightTags]
-  * */
+ * parse VDom
+ * @return [string[], HighlightTags]
+ * */
 function ParseVDom(vnode: VNode): [string[], HighlightTag[]] {
   const root_param_length = Store.pwd.split('/').length - 1;
   let depth = 0;
@@ -68,7 +64,7 @@ function ParseVDom(vnode: VNode): [string[], HighlightTag[]] {
     if (Option.hide_file === true && vfile.filename[0] === '.') {
       return;
     }
-    const [icon, icon_hi_group] = ParseFileIcon(vfile.filename,vfile.ext);
+    const [icon, icon_hi_group] = ParseFileIcon(vfile.filename, vfile.ext);
 
     counter++;
     if (vfile.path.split('/').length - root_param_length !== depth) {
