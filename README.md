@@ -62,6 +62,8 @@ vim.g.node_tree_hide_files = true
 
 ## Remap keymap
 
+> action is meaning to keymap to NodeTree buffer.
+
 vimL version:
 
 ```vimscript
