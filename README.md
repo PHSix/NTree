@@ -8,7 +8,7 @@ It was wrote in typescript and run on nodejs.
 
 Although at the moment, there has many files tree plugin for vim/neovim. Like `nvim-tree.lua` which is a light, fast and strong files tree plugin, `chadtree` which is a fast, powerful files tree plugin. I still want to write a files tree plugin for myself. It is customized for myself. It was created from my demands. And I can control it to do something. 
 
-NodeTree inspired bv `neovim-remote-plugin`, so it will spend too less startuptime. And Nodejs let it powerful and fast.
+NodeTree inspired bv `neovim-remote-plugin`, so it will spend too less startuptime. And Nodejs let it powerful and fast(now has some problem).
 
 # Dependenies
 
@@ -106,7 +106,8 @@ support actions.
 
 # TODO
 
-- [ ] git status support
+- [x] git status support
 - [ ] float window show keymap
 - [ ] vsplit and split window to view
 - [ ] add watch every folder if theirself status change or which file under the folder, NodeTree will re-render.
+- [ ] performance optimization during the rendering phase
