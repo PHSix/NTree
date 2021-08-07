@@ -1,5 +1,4 @@
 import { Neovim, Window } from 'neovim';
-import { Store } from './Store';
 
 export async function setWindowOptions(window: Window): Promise<Window> {
   Promise.all([
@@ -12,18 +11,20 @@ export async function setWindowOptions(window: Window): Promise<Window> {
   return window;
 }
 
-export async function CreateWindow(nvim: Neovim): Promise<Window> {
+export async function createWindow(nvim: Neovim): Promise<Window> {
   const wins = await nvim.windows;
   for (let win of wins) {
     const [, col] = await win.position;
     if (col === 0) {
       nvim.setWindow(win);
+      break;
     }
   }
   await nvim.setOption("splitright", false);
   await nvim.command(`30vsplit`);
   let window = await nvim.window;
   setWindowOptions(window);
-  await window.request(`${window.prefix}set_buf`, [window, Store.buffer]);
   return window;
 }
+
+

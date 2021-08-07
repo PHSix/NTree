@@ -1,8 +1,8 @@
 import { Neovim, Buffer } from 'neovim';
 
-async function createBuffer(nvim: Neovim): Promise<Buffer> {
+export async function createBuffer(nvim: Neovim): Promise<Buffer> {
   const buffer = (await nvim.createBuffer(false, true)) as Buffer;
-  setBufferOption(buffer)
+  setBufferOption(buffer);
   return buffer;
 }
 

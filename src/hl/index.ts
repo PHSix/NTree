@@ -3,6 +3,13 @@
  * */
 import { Neovim } from 'neovim';
 
+export interface HighlightRule {
+  hlGroup: string;
+  colStart: number;
+  colEnd: number;
+  line: number;
+}
+
 export let namespace_id = 0;
 
 export async function init(nvim: Neovim) {
@@ -19,6 +26,7 @@ async function setHlGroup(nvim: Neovim) {
   }
   await Promise.all(hl_queue);
 }
+
 interface Group {
   hl: string;
   color: string;

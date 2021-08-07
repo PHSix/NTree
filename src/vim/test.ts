@@ -42,10 +42,11 @@ function TestRender(root: FolderElement) {
 }
 
 (async () => {
-  const f1 = new FolderElement('workspace', '/home/ph');
+  const f1 = new FolderElement('src', '/home/ph/.local/share/nvim/site/pack/packer/start/node-tree.nvim');
   await f1.generateChildren();
-  await (f1.lastChild.before as FolderElement).generateChildren();
-  await ((f1.lastChild.before as FolderElement).firstChild as FolderElement).generateChildren();
-  await (f1.lastChild as FolderElement).generateChildren();
+  // await (f1.lastChild.before as FolderElement).generateChildren();
+  // await ((f1.lastChild.before as FolderElement)
+  //   .firstChild as FolderElement).generateChildren();
+  // await (f1.lastChild as FolderElement).generateChildren();
   TestRender(f1);
 })();

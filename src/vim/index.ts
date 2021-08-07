@@ -2,6 +2,9 @@ import { Neovim, Buffer } from 'neovim';
 import { BaseElement } from '../dom/BaseElement';
 import { FolderElement } from '../dom/folder';
 import { FileSystem } from '../fs/index';
+import { HighlightRule } from '../hl';
+import { createBuffer } from '../window/buffer';
+import { namespace_id } from '../hl';
 
 const TRUN = '└';
 const LINE = '|';
@@ -16,31 +19,32 @@ export class Vim {
   buffer: Buffer;
   root: FolderElement;
   nvim: Neovim;
+  hl_queue: HighlightRule[];
+  context: string[];
   async render() {
     var point: BaseElement;
-    var renderText: string[];
     var stack: BaseElement[] = [this.root];
-    const hl_queue: Promise<number>[] = [];
     let prefix = ' ';
+    this.hl_queue = [];
+    this.context = [];
     while (true) {
       point = stack.pop();
       if (point.key !== this.root.key && !point.after) {
         prefix = `${prefix.substring(0, prefix.length - 2)}${TRUN} `;
-        renderText.push(`${prefix}${point.attribute.icon} ${point.filename}`);
+        this.context.push(`${prefix}${point.attribute.icon} ${point.filename}`);
         prefix = `${prefix.substring(0, prefix.length - 2)}  `;
       } else if (point.key === this.root.key) {
-        renderText.push(`${prefix}${point.attribute.icon} ${point.filename}`);
+        this.context.push(`${prefix}${point.attribute.icon} ${point.filename}`);
       } else {
-        renderText.push(`${prefix}${point.attribute.icon} ${point.filename}`);
+        this.context.push(`${prefix}${point.attribute.icon} ${point.filename}`);
         stack.push(point.after);
       }
-      hl_queue.push(
-        this.buffer.addHighlight({
-          hlGroup: point.attribute.hlGroup,
-          colStart: prefix.length,
-          colEnd: prefix.length + 2,
-        })
-      );
+      this.hl_queue.push({
+        hlGroup: point.attribute.hlGroup,
+        line: this.context.length - 1,
+        colStart: prefix.length,
+        colEnd: prefix.length + 2,
+      });
       if (
         point instanceof FolderElement &&
         point.unfold === true &&
@@ -57,12 +61,26 @@ export class Vim {
       }
     }
     // render text
-    await this.buffer.setLines(renderText, {
+    await this.buffer.setLines(this.context, {
       start: 0,
       end: -1,
       strictIndexing: true,
     });
-    await Promise.all<number>(hl_queue);
+    const queue: Promise<number>[] = [];
+    for (let hl of this.hl_queue) {
+      this.nvim.outWriteLine(
+        `${hl.hlGroup}, ${hl.colEnd}, ${hl.colStart}, ${hl.line}`
+      );
+      // queue.push(
+      //   this.buffer.addHighlight({
+      //     hlGroup: hl.hlGroup,
+      //     colStart: hl.colStart,
+      //     colEnd: hl.colEnd,
+      //     srcId: namespace_id,
+      //   })
+      // );
+    }
+    await Promise.all(queue);
   }
   constructor(nvim: Neovim) {
     this.nvim = nvim;
@@ -70,5 +88,8 @@ export class Vim {
   async init() {
     const pwd = await this.nvim.commandOutput('pwd');
     this.root = FileSystem.createRoot(pwd);
+    await this.root.generateChildren();
+    this.buffer = await createBuffer(this.nvim);
+    this.context = [];
   }
 }

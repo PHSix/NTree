@@ -23,7 +23,7 @@ return function()
     dependences = "yarn"
     build = "yarn build"
   end
-  if not exec_tool then
+  if exec_tool == nil then
     vim.cmd [[echoerr "[NodeTree] You have not install a package manager for node.js!"]]
     return {
       status = false
