@@ -20,11 +20,9 @@ export async function createWindow(nvim: Neovim): Promise<Window> {
       break;
     }
   }
-  await nvim.setOption("splitright", false);
+  await nvim.setOption('splitright', false);
   await nvim.command(`30vsplit`);
   let window = await nvim.window;
   setWindowOptions(window);
   return window;
 }
-
-

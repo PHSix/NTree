@@ -19,7 +19,7 @@ export class FileElement extends BaseElement {
 }
 
 function getHiGroup(hlGroup: string) {
-  return `NodeTreeIcons${hlGroup}`;
+  return `NodeTreeIcon${hlGroup}`;
 }
 
 function parseEXT(filename: string) {

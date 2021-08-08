@@ -4,7 +4,7 @@ import { FolderElement } from '../dom/folder';
 import { FileSystem } from '../fs/index';
 import { HighlightRule } from '../hl';
 import { createBuffer } from '../window/buffer';
-import { namespace_id } from '../hl';
+import { VimHighlight } from '../hl';
 
 const TRUN = '└';
 const LINE = '|';
@@ -20,10 +20,14 @@ export class Vim {
   root: FolderElement;
   nvim: Neovim;
   hl_queue: HighlightRule[];
+  hl: VimHighlight;
   context: string[];
+  namespace: number;
   async render() {
     var point: BaseElement;
     var stack: BaseElement[] = [this.root];
+
+    await this.buffer.setOption('modifiable', true);
     let prefix = ' ';
     this.hl_queue = [];
     this.context = [];
@@ -39,11 +43,16 @@ export class Vim {
         this.context.push(`${prefix}${point.attribute.icon} ${point.filename}`);
         stack.push(point.after);
       }
+      // WARNING: has bug is this place.  the 'TRUN' char will occpuy more two space.
+      var prefix_len = prefix.length;
+      if (prefix[prefix.length - 2] == ' ') {
+        prefix_len += 2;
+      }
       this.hl_queue.push({
         hlGroup: point.attribute.hlGroup,
         line: this.context.length - 1,
-        colStart: prefix.length,
-        colEnd: prefix.length + 2,
+        colStart: prefix_len,
+        colEnd: prefix_len + 4,
       });
       if (
         point instanceof FolderElement &&
@@ -66,21 +75,21 @@ export class Vim {
       end: -1,
       strictIndexing: true,
     });
+    // set highlight rules
     const queue: Promise<number>[] = [];
     for (let hl of this.hl_queue) {
-      this.nvim.outWriteLine(
-        `${hl.hlGroup}, ${hl.colEnd}, ${hl.colStart}, ${hl.line}`
+      queue.push(
+        this.buffer.addHighlight({
+          hlGroup: hl.hlGroup,
+          line: hl.line,
+          colStart: hl.colStart,
+          colEnd: hl.colEnd,
+          srcId: this.namespace,
+        })
       );
-      // queue.push(
-      //   this.buffer.addHighlight({
-      //     hlGroup: hl.hlGroup,
-      //     colStart: hl.colStart,
-      //     colEnd: hl.colEnd,
-      //     srcId: namespace_id,
-      //   })
-      // );
     }
     await Promise.all(queue);
+    this.buffer.setOption('modifiable', false);
   }
   constructor(nvim: Neovim) {
     this.nvim = nvim;
@@ -90,6 +99,7 @@ export class Vim {
     this.root = FileSystem.createRoot(pwd);
     await this.root.generateChildren();
     this.buffer = await createBuffer(this.nvim);
-    this.context = [];
+    this.hl = new VimHighlight();
+    this.namespace = await this.hl.init(this.nvim);
   }
 }

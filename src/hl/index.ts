@@ -3,6 +3,10 @@
  * */
 import { Neovim } from 'neovim';
 
+interface Group {
+  hl: string;
+  color: string;
+}
 export interface HighlightRule {
   hlGroup: string;
   colStart: number;
@@ -10,26 +14,22 @@ export interface HighlightRule {
   line: number;
 }
 
-export let namespace_id = 0;
-
-export async function init(nvim: Neovim) {
-  namespace_id = await nvim.createNamespace('NodeTreeNameSpace');
-  await setHlGroup(nvim);
-}
-
-async function setHlGroup(nvim: Neovim) {
-  const hl_queue: Promise<any>[] = [];
-  for (let item of groups) {
-    hl_queue.push(
-      nvim.command(`highlight NodeTreeIcon${item.hl} guifg=${item.color}`)
-    );
+export class VimHighlight {
+  async init(nvim: Neovim): Promise<number> {
+    const namespace_id = await nvim.createNamespace('NodeTreeNameSpace');
+    await this.setHlGroup(nvim);
+    return namespace_id;
   }
-  await Promise.all(hl_queue);
-}
-
-interface Group {
-  hl: string;
-  color: string;
+  async setHlGroup(nvim: Neovim) {
+    const hl_queue: Promise<any>[] = [];
+    for (let item of groups) {
+      hl_queue.push(
+        nvim.command(`highlight NodeTreeIcon${item.hl} guifg=${item.color}`)
+      );
+    }
+    hl_queue.push(nvim.command(`hi NodeTreeNormal guifg=#ffffff`));
+    await Promise.all(hl_queue);
+  }
 }
 
 const groups: Group[] = [

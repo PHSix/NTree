@@ -1,7 +1,6 @@
 import { attach } from 'neovim';
 import { createWindow } from './window';
 import { Vim } from './vim/index';
-import { init } from './hl';
 
 var store: Vim;
 
@@ -11,8 +10,11 @@ const nvim = attach({
 
 nvim.on('notification', async (method: string, args: string[]) => {
   if (method === 'open') {
-    await store.render();
+    if (!store.context) {
+      await store.render();
+    }
     const win = await createWindow(nvim);
+    win.setOption('winhl', 'Normal:NodeTreeNormal');
     win.request(`${win.prefix}set_buf`, [win, store.buffer]);
   } else if (method === 'action') {
   }
@@ -20,7 +22,6 @@ nvim.on('notification', async (method: string, args: string[]) => {
 
 nvim.channelId.then(async (channelId) => {
   await nvim.setVar('node_tree_channel_id', channelId);
-  await init(nvim);
   store = new Vim(nvim);
   await store.init();
 });

@@ -55,7 +55,7 @@ export class FolderElement extends BaseElement {
 }
 
 function getHiGroup(hlGroup: string): string {
-  return `NodeTreeIcons${hlGroup}`;
+  return `NodeTreeIcon${hlGroup}`;
 }
 /*
  * to get folder element icon
