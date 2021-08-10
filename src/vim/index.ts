@@ -6,7 +6,7 @@ import { HighlightRule } from '../hl';
 import { createBuffer } from '../window/buffer';
 import { VimHighlight } from '../hl';
 import { Action } from '../action';
-import {logmsg} from '../log'
+import { logmsg } from '../log';
 
 // const TRUN = '└';
 // const LINE = '|';
@@ -28,6 +28,7 @@ export class Vim {
   context: string[];
   namespace: number;
   ac: Action;
+  hidden: boolean;
   async render() {
     var point: BaseElement;
     var stack: BaseElement[] = [this.root];
@@ -38,34 +39,42 @@ export class Vim {
     this.context = [];
     while (true) {
       point = stack.pop();
-      if (point.key !== this.root.key && !point.after) {
-        prefix = `${prefix.substring(0, prefix.length - 2)}${TRUN} `;
-        this.context.push(`${prefix}${point.attribute.icon} ${point.filename}`);
-        prefix = `${prefix.substring(0, prefix.length - 2)}  `;
-      } else if (point.key === this.root.key) {
-        this.context.push(`${prefix}${point.attribute.icon} ${point.filename}`);
+      if (point.after) stack.push(point.after);
+      if (this.hidden === true && point.key !== this.root.key) {
+        if (point.filename[0] !== '.') {
+          this.context.push(
+            `${prefix}${point.attribute.icon} ${point.filename}`
+          );
+          this.hl_queue.push({
+            hlGroup: point.attribute.hlGroup,
+            line: this.context.length - 1,
+            colStart: prefix.length,
+            colEnd: prefix.length + 4,
+          });
+        }
       } else {
         this.context.push(`${prefix}${point.attribute.icon} ${point.filename}`);
-        stack.push(point.after);
+        this.hl_queue.push({
+          hlGroup: point.attribute.hlGroup,
+          line: this.context.length - 1,
+          colStart: prefix.length,
+          colEnd: prefix.length + 4,
+        });
       }
-      // WARNING: has bug is this place.  the 'TRUN' char will occpuy more two space.
-      var prefix_len = prefix.length;
-      // if (prefix[prefix.length - 2] == ' ') {
-      //   prefix_len += 2;
-      // }
-      this.hl_queue.push({
-        hlGroup: point.attribute.hlGroup,
-        line: this.context.length - 1,
-        colStart: prefix_len,
-        colEnd: prefix_len + 4,
-      });
       if (
         point instanceof FolderElement &&
         point.unfold === true &&
         point.firstChild
       ) {
-        prefix = `${prefix}${LINE} `;
-        stack.push(point.firstChild);
+        if (this.hidden === true && point.key !== this.root.key) {
+          if (point.filename[0] !== '.') {
+            prefix = `${prefix}  `;
+            stack.push(point.firstChild);
+          }
+        } else {
+          prefix = `${prefix}  `;
+          stack.push(point.firstChild);
+        }
       }
       if (point.key !== this.root.key && !point.after) {
         prefix = prefix.substring(0, prefix.length - 2);
@@ -108,6 +117,7 @@ export class Vim {
     this.buffer = await createBuffer(this.nvim);
     this.hl = new VimHighlight();
     this.namespace = await this.hl.init(this.nvim);
+    this.hidden = (await this.nvim.getVar('node_tree_hide_files')) as boolean;
   }
   async open() {
     const pwd = await this.nvim.commandOutput('pwd');
@@ -118,9 +128,14 @@ export class Vim {
     }
   }
   async action(to: string) {
-    logmsg(to)
+    logmsg(to);
     if (to === 'dirup') {
-      this.root = await this.ac.dirup(this.root)
+      this.root = await this.ac.dirup(this.root);
+      await this.render();
+      return;
+    } else if (to === 'hide') {
+      this.hidden = !this.hidden;
+      this.nvim.setVar('node_tree_hide_files', this.hidden);
       await this.render();
       return;
     }
@@ -129,7 +144,7 @@ export class Vim {
     await this.ac.handle(element, to);
     await this.render();
   }
-  findElement(aim: number): BaseElement {
+  findElement(pos: number): BaseElement {
     var point: BaseElement;
     var stack: BaseElement[] = [this.root];
     var counter = 0;
@@ -143,10 +158,20 @@ export class Vim {
         point.unfold === true &&
         point.firstChild
       ) {
-        stack.push(point.firstChild);
+        // hide file
+        if (this.hidden === true && point.key !== this.root.key) {
+          if (point.filename[0] !== '.') stack.push(point.firstChild);
+        } else {
+          // dont hide file
+          stack.push(point.firstChild);
+        }
       }
-      counter++;
-      if (counter === aim) {
+      if (this.hidden === true && point.key !== this.root.key) {
+        if (point.filename[0] !== '.') counter++;
+      } else {
+        counter++;
+      }
+      if (counter === pos) {
         return point;
       }
     }

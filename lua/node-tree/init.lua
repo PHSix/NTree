@@ -56,6 +56,8 @@ function M.registerKeymap()
   api.nvim_buf_set_keymap(0, "n", "rn", ":lua require('node-tree').action('rename')<CR>", default_opts)
   api.nvim_buf_set_keymap(0, "n", "cn", ":lua require('node-tree').action('touch')<CR>", default_opts)
   api.nvim_buf_set_keymap(0, "n", "mk", ":lua require('node-tree').action('mkdir')<CR>", default_opts)
+  api.nvim_buf_set_keymap(0, "n", "zh", ":lua require('node-tree').action('hide')<CR>", default_opts)
+  api.nvim_buf_set_keymap(0, "n", "dd", ":lua require('node-tree').action('remove')<CR>", default_opts)
 end
 
 function M.registerDirname(dir)

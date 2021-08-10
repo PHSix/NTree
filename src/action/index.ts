@@ -3,6 +3,17 @@ import { FolderElement } from '../dom/folder';
 import { Neovim } from 'neovim';
 import { FileElement } from '../dom/file';
 import { FileSystem } from '../fs';
+
+function calcLen(p: BaseElement): number {
+  var counter = 1;
+  var point = p;
+  while (point) {
+    point = point.after;
+    counter++;
+  }
+  return counter;
+}
+
 export class Action {
   nvim: Neovim;
   constructor(nvim: Neovim) {
@@ -18,16 +29,16 @@ export class Action {
     } else {
       switch (to) {
         case 'rename':
-          this.rename(element);
+          await this.rename(element);
           break;
         case 'remove':
-          this.remove(element);
+          await this.remove(element);
           break;
         case 'touch':
-          this.touch(element);
+          await this.touch(element);
           break;
         case 'mkdir':
-          this.mkdir(element);
+          await this.mkdir(element);
           break;
       }
     }
@@ -44,8 +55,9 @@ export class Action {
       f.filename,
     ])) as string;
     FileSystem.renameFile(f.fullpath, `${f.path}/${reFilename}`);
+    await this.update(f.parent);
   }
-  async dirup(f: FolderElement) {
+  async dirup(f: FolderElement): Promise<FolderElement> {
     const newRoot = FileSystem.createRoot(f.path);
     await newRoot.generateChildren();
     var point = newRoot.firstChild;
@@ -68,7 +80,7 @@ export class Action {
       `Touch a file in : ${f.path}/`,
     ])) as string;
     FileSystem.touchFile(`${f.path}/${file}`);
-    this.update(f.parent);
+    await this.update(f.parent);
   }
   async mkdir(f: BaseElement) {
     const folder = (await this.nvim.callFunction('input', [
@@ -80,13 +92,14 @@ export class Action {
     const status = FileSystem.createDir(`${f.path}/${folder}`);
     if (status === false) {
     }
-    this.update(f.parent);
+    await this.update(f.parent);
   }
   async remove(f: BaseElement) {
     const before = f.before;
     const after = f.after;
     before.after = after;
     after.before = before;
+    FileSystem.delete(f.fullpath);
   }
 
   /*
@@ -95,7 +108,31 @@ export class Action {
    * */
   private async update(f: FolderElement) {
     const nf = FileSystem.createRoot(f.fullpath);
-    var op = f.firstChild;
-    var np = nf.firstChild;
+    await nf.generateChildren();
+    // var op = f.firstChild;
+    // var dp = op;
+    // var np = nf.firstChild;
+    // while (np) {
+    //   dp = op;
+    //   while (dp) {
+    //     if (
+    //       dp.filename === np.filename &&
+    //       dp instanceof FolderElement &&
+    //       np instanceof FolderElement
+    //     ) {
+    //       op = dp;
+    //       np.firstChild = dp.firstChild;
+    //       np.lastChild = dp.lastChild;
+    //       break;
+    //     }
+    //     dp = dp.after;
+    //   }
+    //   if (!dp) {
+    //     break;
+    //   }
+    //   np = np.after;
+    // }
+    f.firstChild = nf.firstChild;
+    f.lastChild = nf.lastChild;
   }
 }
