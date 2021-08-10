@@ -1,3 +1,5 @@
+import { FolderElement } from "./folder";
+
 export interface BaseAttribute {
   icon: string;
   git?: string;
@@ -11,7 +13,7 @@ export class BaseElement {
   fullpath: string;
   after: BaseElement;
   before: BaseElement;
-  parent: BaseElement;
+  parent: FolderElement;
   insertBefore(b: BaseElement) {
     b.before = this.before;
     this.before.after = b;
@@ -32,7 +34,7 @@ export class BaseElement {
     if (this.after !== null && this.after.after !== null)
       this.after = this.after.after;
   }
-  constructor(filename: string, path: string, parent: BaseElement) {
+  constructor(filename: string, path: string, parent: FolderElement) {
     this.filename = filename;
     this.path = path;
     this.fullpath = `${path}/${filename}`;

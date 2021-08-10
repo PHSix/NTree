@@ -8,15 +8,14 @@ const nvim = attach({
   socket: process.env.NVIM_LISTEN_ADDRESS,
 });
 
-nvim.on('notification', async (method: string, args: string[]) => {
+nvim.on('notification', async (method: string, args: {}[]) => {
   if (method === 'open') {
-    if (!store.context) {
-      await store.render();
-    }
+    await store.open();
     const win = await createWindow(nvim);
     win.setOption('winhl', 'Normal:NodeTreeNormal');
     win.request(`${win.prefix}set_buf`, [win, store.buffer]);
   } else if (method === 'action') {
+    store.action(args[0].toString());
   }
 });
 

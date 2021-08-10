@@ -3,10 +3,10 @@ local M = {}
 local api = vim.api
 local loaded = false
 
-local dirname = "/home/ph/.local/share/nvim/site/pack/packer/start/node-tree.nvim"
+local dirname
 
-local notify = function(msg)
-  vim.rpcnotify(vim.g.node_tree_channel_id, msg, {})
+local notify = function(msg, args)
+  vim.rpcnotify(vim.g.node_tree_channel_id, msg, args or {})
   -- vim.rpcnotify(vim.g.translator_node_channel_id, to, args)
 end
 
@@ -27,6 +27,12 @@ M.toggle = function()
   end
 end
 
+M.action = function(ac)
+  if (vim.g._node_tree_rendered == nil or vim.g._node_tree_rendered == 1) then
+    notify("action", {ac})
+  end
+end
+
 function M.setup()
   if loaded then
     return
@@ -35,7 +41,25 @@ function M.setup()
   if health["status"] == false then
     return
   end
+  vim.cmd [[augroup nodetree]]
+  vim.cmd [[autocmd FileType NodeTree lua require("node-tree").registerKeymap()]]
+  vim.cmd [[augroup END]]
   vim.cmd [[command! NToggle lua require("node-tree").toggle()]]
+end
+
+function M.registerKeymap()
+  local default_opts = {silent = true}
+  api.nvim_buf_set_keymap(0, "n", "q", ":q<CR>", default_opts)
+  api.nvim_buf_set_keymap(0, "n", "o", ":lua require('node-tree').action('operate')<CR>", default_opts)
+  api.nvim_buf_set_keymap(0, "n", "u", ":lua require('node-tree').action('dirup')<CR>", default_opts)
+  api.nvim_buf_set_keymap(0, "n", "a", ":lua require('node-tree').action('append')<CR>", default_opts)
+  api.nvim_buf_set_keymap(0, "n", "rn", ":lua require('node-tree').action('rename')<CR>", default_opts)
+  api.nvim_buf_set_keymap(0, "n", "cn", ":lua require('node-tree').action('touch')<CR>", default_opts)
+  api.nvim_buf_set_keymap(0, "n", "mk", ":lua require('node-tree').action('mkdir')<CR>", default_opts)
+end
+
+function M.registerDirname(dir)
+	dirname = unpack(dir)
 end
 
 return M

@@ -5,9 +5,13 @@ import { FileSystem } from '../fs/index';
 import { HighlightRule } from '../hl';
 import { createBuffer } from '../window/buffer';
 import { VimHighlight } from '../hl';
+import { Action } from '../action';
+import {logmsg} from '../log'
 
-const TRUN = '└';
-const LINE = '|';
+// const TRUN = '└';
+// const LINE = '|';
+const TRUN = ' ';
+const LINE = ' ';
 
 /*
  * There has 4 tasks in this function.
@@ -23,6 +27,7 @@ export class Vim {
   hl: VimHighlight;
   context: string[];
   namespace: number;
+  ac: Action;
   async render() {
     var point: BaseElement;
     var stack: BaseElement[] = [this.root];
@@ -45,9 +50,9 @@ export class Vim {
       }
       // WARNING: has bug is this place.  the 'TRUN' char will occpuy more two space.
       var prefix_len = prefix.length;
-      if (prefix[prefix.length - 2] == ' ') {
-        prefix_len += 2;
-      }
+      // if (prefix[prefix.length - 2] == ' ') {
+      //   prefix_len += 2;
+      // }
       this.hl_queue.push({
         hlGroup: point.attribute.hlGroup,
         line: this.context.length - 1,
@@ -70,10 +75,10 @@ export class Vim {
       }
     }
     // render text
-    await this.buffer.setLines(this.context, {
+    this.buffer.setLines(this.context, {
       start: 0,
       end: -1,
-      strictIndexing: true,
+      strictIndexing: false,
     });
     // set highlight rules
     const queue: Promise<number>[] = [];
@@ -89,10 +94,12 @@ export class Vim {
       );
     }
     await Promise.all(queue);
-    this.buffer.setOption('modifiable', false);
+    await this.buffer.setOption('modifiable', false);
+    await this.nvim.setVar('_node_tree_rendered', 1);
   }
   constructor(nvim: Neovim) {
     this.nvim = nvim;
+    this.ac = new Action(nvim);
   }
   async init() {
     const pwd = await this.nvim.commandOutput('pwd');
@@ -101,5 +108,47 @@ export class Vim {
     this.buffer = await createBuffer(this.nvim);
     this.hl = new VimHighlight();
     this.namespace = await this.hl.init(this.nvim);
+  }
+  async open() {
+    const pwd = await this.nvim.commandOutput('pwd');
+    if (this.root.path !== pwd) {
+      this.root = FileSystem.createRoot(pwd);
+      await this.root.generateChildren();
+      await this.render();
+    }
+  }
+  async action(to: string) {
+    logmsg(to)
+    if (to === 'dirup') {
+      this.root = await this.ac.dirup(this.root)
+      await this.render();
+      return;
+    }
+    const [col] = await this.nvim.window.cursor;
+    const element = this.findElement(col);
+    await this.ac.handle(element, to);
+    await this.render();
+  }
+  findElement(aim: number): BaseElement {
+    var point: BaseElement;
+    var stack: BaseElement[] = [this.root];
+    var counter = 0;
+    while (true) {
+      point = stack.pop();
+      if (point.after) {
+        stack.push(point.after);
+      }
+      if (
+        point instanceof FolderElement &&
+        point.unfold === true &&
+        point.firstChild
+      ) {
+        stack.push(point.firstChild);
+      }
+      counter++;
+      if (counter === aim) {
+        return point;
+      }
+    }
   }
 }

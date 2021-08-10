@@ -1,6 +1,7 @@
 import { BaseElement } from './BaseElement';
 import icons, { IconModel } from '../icons';
 import { FileSystem } from '../fs/index';
+import {logmsg} from '../log'
 
 export class FolderElement extends BaseElement {
   private _unfold: boolean;
@@ -39,6 +40,7 @@ export class FolderElement extends BaseElement {
   }
   public async generateChildren(): Promise<void> {
     const [folders, files] = await FileSystem.findChildren(this.fullpath, this);
+    logmsg(`folders: ${folders.length}, files: ${files.length}`)
     this.unfold = true;
     if (folders.length !== 0) {
       folders.forEach((item) => {
@@ -49,6 +51,9 @@ export class FolderElement extends BaseElement {
       files.forEach((item) => {
         this.appendChild(item);
       });
+    }
+    if (this.firstChild === undefined) {
+      this.firstChild = this.lastChild = null;
     }
     return;
   }
