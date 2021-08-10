@@ -7,21 +7,22 @@ local dirname
 
 local notify = function(msg, args)
   vim.rpcnotify(vim.g.node_tree_channel_id, msg, args or {})
-  -- vim.rpcnotify(vim.g.translator_node_channel_id, to, args)
 end
 
 local existWin = function()
   for _, value in pairs(api.nvim_list_wins()) do
     local buf = api.nvim_win_get_buf(value)
     if api.nvim_buf_get_option(buf, "filetype") == "NodeTree" then
-      return true
+      return {status = true, win = value}
     end
+    return {status = false}
   end
 end
 
 M.toggle = function()
-  if (existWin()) then
-    notify("close")
+  local res = existWin()
+  if res.status == true then
+    vim.api.nvim_win_close(res.win, false)
   else
     notify("open")
   end
@@ -61,7 +62,7 @@ function M.registerKeymap()
 end
 
 function M.registerDirname(dir)
-	dirname = unpack(dir)
+  dirname = unpack(dir)
 end
 
 return M

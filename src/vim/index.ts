@@ -128,7 +128,6 @@ export class Vim {
     }
   }
   async action(to: string) {
-    logmsg(to);
     if (to === 'dirup') {
       this.root = await this.ac.dirup(this.root);
       await this.render();

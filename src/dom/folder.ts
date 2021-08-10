@@ -40,7 +40,6 @@ export class FolderElement extends BaseElement {
   }
   public async generateChildren(): Promise<void> {
     const [folders, files] = await FileSystem.findChildren(this.fullpath, this);
-    logmsg(`folders: ${folders.length}, files: ${files.length}`)
     this.unfold = true;
     if (folders.length !== 0) {
       folders.forEach((item) => {
