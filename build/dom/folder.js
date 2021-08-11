@@ -4,7 +4,6 @@ exports.FolderElement = void 0;
 const BaseElement_1 = require("./BaseElement");
 const icons_1 = require("../icons");
 const index_1 = require("../fs/index");
-const log_1 = require("../log");
 class FolderElement extends BaseElement_1.BaseElement {
     constructor(filename, path, parent = null) {
         super(filename, path, parent);
@@ -40,7 +39,6 @@ class FolderElement extends BaseElement_1.BaseElement {
     }
     async generateChildren() {
         const [folders, files] = await index_1.FileSystem.findChildren(this.fullpath, this);
-        log_1.logmsg(`folders: ${folders.length}, files: ${files.length}`);
         this.unfold = true;
         if (folders.length !== 0) {
             folders.forEach((item) => {

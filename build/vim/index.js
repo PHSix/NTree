@@ -6,7 +6,6 @@ const index_1 = require("../fs/index");
 const buffer_1 = require("../window/buffer");
 const hl_1 = require("../hl");
 const action_1 = require("../action");
-const log_1 = require("../log");
 // const TRUN = '└';
 // const LINE = '|';
 const TRUN = ' ';
@@ -113,21 +112,9 @@ class Vim {
         }
     }
     async action(to) {
-        log_1.logmsg(to);
-        if (to === 'dirup') {
-            this.root = await this.ac.dirup(this.root);
-            await this.render();
-            return;
-        }
-        else if (to === 'hide') {
-            this.hidden = !this.hidden;
-            this.nvim.setVar('node_tree_hide_files', this.hidden);
-            await this.render();
-            return;
-        }
         const [col] = await this.nvim.window.cursor;
         const element = this.findElement(col);
-        await this.ac.handle(element, to);
+        await this.ac.handle(element, to, this);
         await this.render();
     }
     findElement(pos) {

@@ -17,31 +17,40 @@ class Action {
     constructor(nvim) {
         this.nvim = nvim;
     }
-    async handle(element, to) {
-        if (to === 'operate') {
-            if (element instanceof file_1.FileElement) {
-                this.nvim.command(`e ${element.fullpath}`);
-            }
-            else {
-                await this.toggle(element);
-            }
+    async handle(element, to, store) {
+        switch (to) {
+            case 'operate':
+                await this.operta(element);
+                break;
+            case 'rename':
+                await this.rename(element);
+                break;
+            case 'remove':
+                await this.remove(element);
+                break;
+            case 'touch':
+                await this.touch(element);
+                break;
+            case 'mkdir':
+                await this.mkdir(element);
+                break;
+            case 'dirup':
+                await this.dirup(store);
+                break;
+            case 'hide':
+                await this.hide(store);
+                break;
         }
-        else {
-            switch (to) {
-                case 'rename':
-                    await this.rename(element);
-                    break;
-                case 'remove':
-                    await this.remove(element);
-                    break;
-                case 'touch':
-                    await this.touch(element);
-                    break;
-                case 'mkdir':
-                    await this.mkdir(element);
-                    break;
-            }
-        }
+    }
+    async operta(f) {
+        if (f instanceof file_1.FileElement)
+            this.nvim.command(`e ${f.fullpath}`);
+        else
+            await this.toggle(f);
+    }
+    async hide(store) {
+        store.hidden = !store.hidden;
+        this.nvim.setVar('node_tree_hide_files', store.hidden);
     }
     async toggle(f) {
         f.unfold = !f.unfold;
@@ -57,24 +66,25 @@ class Action {
         fs_1.FileSystem.renameFile(f.fullpath, `${f.path}/${reFilename}`);
         await this.update(f.parent);
     }
-    async dirup(f) {
-        const newRoot = fs_1.FileSystem.createRoot(f.path);
+    async dirup(store) {
+        const root = store.root;
+        const newRoot = fs_1.FileSystem.createRoot(root.path);
         await newRoot.generateChildren();
         var point = newRoot.firstChild;
-        this.nvim.outWriteLine(`${point.after.filename}  ${f.filename}`);
+        await this.nvim.outWriteLine(`${point.filename}  ${root.filename}`);
         while (true) {
             await this.nvim.outWriteLine(point.filename);
-            if (point.filename === f.filename && point instanceof folder_1.FolderElement) {
+            if (point.filename === root.filename && point instanceof folder_1.FolderElement) {
                 point.unfold = true;
-                point.firstChild = f.firstChild;
-                point.lastChild = f.lastChild;
+                point.firstChild = root.firstChild;
+                point.lastChild = root.lastChild;
                 break;
             }
             point = point.after;
             if (!point.after)
                 break;
         }
-        return newRoot;
+        store.root = newRoot;
     }
     async touch(f) {
         const file = (await this.nvim.callFunction('input', [

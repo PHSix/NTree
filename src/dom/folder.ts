@@ -1,7 +1,6 @@
 import { BaseElement } from './BaseElement';
 import icons, { IconModel } from '../icons';
 import { FileSystem } from '../fs/index';
-import {logmsg} from '../log'
 
 export class FolderElement extends BaseElement {
   private _unfold: boolean;
