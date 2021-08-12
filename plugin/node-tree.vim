@@ -32,7 +32,13 @@ function! s:node_install_deps()
   echom "[NodeTree] Your has installed nodejs dependences."
 endfunction
 
+function! s:node_error_msg_notify()
+  echoerr "[NodeTree] You need run NDeps at the first time to install dependences..."
+endfunction
+
 command! NDeps call s:node_install_deps()
+
+command! NToggle call s:node_error_msg_notify()
 
 if empty(glob(printf('%s/node_modules', s:dirname))) > 0
   finish
