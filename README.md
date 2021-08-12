@@ -62,7 +62,7 @@ lua version:
 vim.g.node_tree_hide_files = true
 ```
 
-## Remap keymap
+## Remap keymap(TODO: no support now)
 
 > action is meaning to keymap to NodeTree buffer.
 
