@@ -9,7 +9,7 @@ const nvim = neovim_1.attach({
 });
 nvim.on('notification', async (method, args) => {
     if (method === 'open') {
-        await nvim.window;
+        store.win = await nvim.window;
         await store.open();
         const win = await window_1.createWindow(nvim);
         win.setOption('winhl', 'Normal:NodeTreeNormal');

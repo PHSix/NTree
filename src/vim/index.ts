@@ -1,4 +1,4 @@
-import { Neovim, Buffer } from 'neovim';
+import { Neovim, Buffer, Window } from 'neovim';
 import { BaseElement } from '../dom/BaseElement';
 import { FolderElement } from '../dom/folder';
 import { FileSystem } from '../fs/index';
@@ -47,6 +47,7 @@ export class Vim {
   namespace: number;
   ac: Action;
   hidden: boolean;
+  win: Window;
   async render() {
     await this.buffer.setOption('modifiable', true);
     let prefix = ' ';

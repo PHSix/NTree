@@ -11,7 +11,7 @@ class Action {
     async handle(element, to, store) {
         switch (to) {
             case 'operate':
-                await this.opearte(element);
+                await this.opearte(element, store);
                 break;
             case 'rename':
                 await this.rename(element);
@@ -33,12 +33,21 @@ class Action {
                 break;
         }
     }
-    async opearte(f) {
+    async opearte(f, v) {
         if (f instanceof file_1.FileElement) {
-            this.nvim.command(`e ${f.fullpath}`);
+            await this.edit(f, v);
         }
         else {
             await this.toggle(f);
+        }
+    }
+    async edit(f, v) {
+        if (await v.win.valid) {
+            this.nvim.setWindow(v.win);
+            this.nvim.command(`e ${f.fullpath}`);
+        }
+        else {
+            // TODO:
         }
     }
     async hide(store) {

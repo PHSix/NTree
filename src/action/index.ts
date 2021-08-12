@@ -13,7 +13,7 @@ export class Action {
   async handle(element: BaseElement, to: string, store: Vim) {
     switch (to) {
       case 'operate':
-        await this.opearte(element);
+        await this.opearte(element, store);
         break;
       case 'rename':
         await this.rename(element);
@@ -35,11 +35,20 @@ export class Action {
         break;
     }
   }
-  async opearte(f: BaseElement) {
+  async opearte(f: BaseElement, v: Vim) {
     if (f instanceof FileElement) {
-      this.nvim.command(`e ${f.fullpath}`);
+      await this.edit(f, v);
     } else {
       await this.toggle(f as FolderElement);
+    }
+  }
+
+  async edit(f: BaseElement, v: Vim) {
+    if (await v.win.valid) {
+      this.nvim.setWindow(v.win);
+      this.nvim.command(`e ${f.fullpath}`);
+    } else {
+      // TODO:
     }
   }
   async hide(store: Vim) {

@@ -10,7 +10,7 @@ const nvim = attach({
 
 nvim.on('notification', async (method: string, args: {}[]) => {
   if (method === 'open') {
-    await nvim.window
+    store.win = await nvim.window;
     await store.open();
     const win = await createWindow(nvim);
     win.setOption('winhl', 'Normal:NodeTreeNormal');
