@@ -1,6 +1,6 @@
 # Introduction
 
-NodeTree is a ~~remote plugin~~(Now it dont use neovim provide `remote plugin function`. NodeTree build it by channel and rpc.) of files tree for neovim.
+NodeTree is a ~~remote plugin~~(Now it dont use neovim provide `remote plugin function`. NodeTree use build-in rpc to work.) of files tree for neovim.
 
 It was wrote by typescript and run on nodejs.
 
@@ -8,7 +8,7 @@ It was wrote by typescript and run on nodejs.
 
 Although at the moment, there has many files tree plugin for vim/neovim. Like `nvim-tree.lua` which is a light, fast and strong files tree plugin, `chadtree` which is a fast, powerful files tree plugin. I still want to write a files tree plugin for myself. It is customized for myself. It was created from my demands. And I can control it to do something.
 
-NodeTree inspired bv `neovim-remote-plugin`, so it will spend too less startuptime. And Nodejs let it powerful and fast.
+NodeTree inspired bv `neovim-remote-plugin`, so it will spend too less startuptime. And Nodejs let it powerful and fast(now has some problem).
 
 # Dependenies
 
@@ -64,6 +64,8 @@ vim.g.node_tree_hide_files = true
 
 ## Remap keymap
 
+> action is meaning to keymap to NodeTree buffer.
+
 vimL version:
 
 ```vimscript
@@ -111,3 +113,5 @@ support actions.
 - [ ] git status support
 - [ ] float window show keymap
 - [ ] vsplit and split window to view
+- [x] use the build-in rpc instead of remote plugin
+
