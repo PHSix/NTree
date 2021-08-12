@@ -1,12 +1,12 @@
 # Introduction
 
-NodeTree is a remote plugin of files tree for neovim.
+NodeTree is a ~~remote plugin~~(Now it dont use neovim provide `remote plugin function`. NodeTree use build-in rpc to work.) of files tree for neovim.
 
-It was wrote in typescript and run on nodejs.
+It was wrote by typescript and run on nodejs.
 
 ## Why NodeTree?
 
-Although at the moment, there has many files tree plugin for vim/neovim. Like `nvim-tree.lua` which is a light, fast and strong files tree plugin, `chadtree` which is a fast, powerful files tree plugin. I still want to write a files tree plugin for myself. It is customized for myself. It was created from my demands. And I can control it to do something. 
+Although at the moment, there has many files tree plugin for vim/neovim. Like `nvim-tree.lua` which is a light, fast and strong files tree plugin, `chadtree` which is a fast, powerful files tree plugin. I still want to write a files tree plugin for myself. It is customized for myself. It was created from my demands. And I can control it to do something.
 
 NodeTree inspired bv `neovim-remote-plugin`, so it will spend too less startuptime. And Nodejs let it powerful and fast(now has some problem).
 
@@ -45,6 +45,8 @@ use {
 ```
 
 # Config
+
+> **Your need run `:NDeps` at the first time if you dont install the nodejs dependenies.**
 
 If your dont want to hide dotfile when open NodeTree.
 
@@ -108,8 +110,8 @@ support actions.
 
 # TODO
 
-- [x] git status support
+- [ ] git status support
 - [ ] float window show keymap
 - [ ] vsplit and split window to view
-- [ ] add watch every folder if theirself status change or which file under the folder, NodeTree will re-render.
-- [ ] performance optimization during the rendering phase
+- [x] use the build-in rpc instead of remote plugin
+
