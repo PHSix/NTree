@@ -55,6 +55,15 @@ class FolderElement extends BaseElement_1.BaseElement {
         }
         return;
     }
+    applyChildren(first, last) {
+        this.firstChild = first;
+        this.lastChild = last;
+        var point = first;
+        while (point) {
+            point.parent = this;
+            point = point.after;
+        }
+    }
 }
 exports.FolderElement = FolderElement;
 function getHiGroup(hlGroup) {
@@ -64,13 +73,13 @@ function getHiGroup(hlGroup) {
  * to get folder element icon
  * */
 function getIcon(filename, unfold) {
-    if (icons_1.default[filename]) {
-        return icons_1.default[filename];
+    if (icons_1.folderIcons[filename]) {
+        return icons_1.folderIcons[filename];
     }
     else {
         if (unfold) {
-            return icons_1.default['default_folder_open'];
+            return icons_1.folderIcons['default_folder_open'];
         }
-        return icons_1.default['default_folder'];
+        return icons_1.folderIcons['default_folder'];
     }
 }

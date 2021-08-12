@@ -1,9 +1,21 @@
 import { BaseElement } from './BaseElement';
-import icons, { IconModel } from '../icons';
+import { IconModel, folderIcons } from '../icons';
 import { FileSystem } from '../fs/index';
 
 export class FolderElement extends BaseElement {
+  firstChild: BaseElement;
+  lastChild: BaseElement;
   private _unfold: boolean;
+  constructor(filename: string, path: string, parent: FolderElement = null) {
+    super(filename, path, parent);
+    this._unfold = false;
+    const { icon, name } = getIcon(filename, this._unfold);
+    const hlGroup = getHiGroup(name);
+    this.attribute = {
+      icon,
+      hlGroup,
+    };
+  }
   set unfold(value: boolean) {
     this._unfold = value;
     const { icon, name } = getIcon(this.filename, this._unfold);
@@ -16,8 +28,6 @@ export class FolderElement extends BaseElement {
   get unfold() {
     return this._unfold;
   }
-  firstChild: BaseElement;
-  lastChild: BaseElement;
   public appendChild(c: BaseElement) {
     if (!this.firstChild) {
       this.firstChild = this.lastChild = c;
@@ -26,16 +36,6 @@ export class FolderElement extends BaseElement {
       c.before = this.lastChild;
       this.lastChild = c;
     }
-  }
-  constructor(filename: string, path: string, parent: FolderElement = null) {
-    super(filename, path, parent);
-    this._unfold = false;
-    const { icon, name } = getIcon(filename, this._unfold);
-    const hlGroup = getHiGroup(name);
-    this.attribute = {
-      icon,
-      hlGroup,
-    };
   }
   public async generateChildren(): Promise<void> {
     const [folders, files] = await FileSystem.findChildren(this.fullpath, this);
@@ -55,6 +55,15 @@ export class FolderElement extends BaseElement {
     }
     return;
   }
+  public applyChildren(first: BaseElement, last: BaseElement) {
+    this.firstChild = first;
+    this.lastChild = last;
+    var point = first;
+    while (point) {
+      point.parent = this;
+      point = point.after;
+    }
+  }
 }
 
 function getHiGroup(hlGroup: string): string {
@@ -64,12 +73,12 @@ function getHiGroup(hlGroup: string): string {
  * to get folder element icon
  * */
 function getIcon(filename: string, unfold: boolean): IconModel {
-  if (icons[filename]) {
-    return icons[filename];
+  if (folderIcons[filename]) {
+    return folderIcons[filename];
   } else {
     if (unfold) {
-      return icons['default_folder_open'];
+      return folderIcons['default_folder_open'];
     }
-    return icons['default_folder'];
+    return folderIcons['default_folder'];
   }
 }

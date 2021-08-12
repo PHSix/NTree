@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const icons = {
+exports.folderIcons = exports.icons = void 0;
+exports.icons = {
     gruntfile: {
         icon: '',
         name: 'Gruntfile',
@@ -746,4 +747,22 @@ const icons = {
         name: 'DefaultFolder',
     },
 };
-exports.default = icons;
+exports.folderIcons = {
+    node_modules: {
+        icon: '',
+        name: 'NodeModules',
+    },
+    desktop: {
+        icon: '',
+        name: 'DesktopEntry',
+    },
+    default_folder: {
+        icon: '',
+        name: 'DefaultFolder',
+    },
+    default_folder_open: {
+        icon: '',
+        name: 'DefaultFolder',
+    },
+};
+exports.default = exports.icons;

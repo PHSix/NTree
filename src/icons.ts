@@ -3,7 +3,7 @@ export interface IconModel {
   name: string;
 }
 
-const icons = {
+export const icons = {
   gruntfile: {
     icon: '',
     name: 'Gruntfile',
@@ -749,5 +749,24 @@ const icons = {
     name: 'DefaultFolder',
   },
 };
+
+export const folderIcons = {
+  node_modules: {
+    icon: '',
+    name: 'NodeModules',
+  },
+  desktop: {
+    icon: '',
+    name: 'DesktopEntry',
+  },
+  default_folder: {
+    icon: '',
+    name: 'DefaultFolder',
+  },
+  default_folder_open: {
+    icon: '',
+    name: 'DefaultFolder',
+  },
+}
 
 export default icons;

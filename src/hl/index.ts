@@ -12,6 +12,7 @@ export interface HighlightRule {
   colStart: number;
   colEnd: number;
   line: number;
+  srcId: number;
 }
 
 export class VimHighlight {

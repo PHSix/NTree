@@ -5,16 +5,6 @@ import { FileElement } from '../dom/file';
 import { FileSystem } from '../fs';
 import { Vim } from '../vim';
 
-function calcLen(p: BaseElement): number {
-  var counter = 1;
-  var point = p;
-  while (point) {
-    point = point.after;
-    counter++;
-  }
-  return counter;
-}
-
 export class Action {
   nvim: Neovim;
   constructor(nvim: Neovim) {
@@ -23,7 +13,7 @@ export class Action {
   async handle(element: BaseElement, to: string, store: Vim) {
     switch (to) {
       case 'operate':
-        await this.operta(element);
+        await this.opearte(element);
         break;
       case 'rename':
         await this.rename(element);
@@ -45,9 +35,12 @@ export class Action {
         break;
     }
   }
-  async operta(f: BaseElement) {
-    if (f instanceof FileElement) this.nvim.command(`e ${f.fullpath}`);
-    else await this.toggle(f as FolderElement);
+  async opearte(f: BaseElement) {
+    if (f instanceof FileElement) {
+      this.nvim.command(`e ${f.fullpath}`);
+    } else {
+      await this.toggle(f as FolderElement);
+    }
   }
   async hide(store: Vim) {
     store.hidden = !store.hidden;
@@ -55,7 +48,7 @@ export class Action {
   }
   async toggle(f: FolderElement) {
     f.unfold = !f.unfold;
-    if (f.unfold && f.lastChild === undefined) {
+    if (f.unfold && f.firstChild === undefined) {
       await f.generateChildren();
     }
   }
@@ -74,7 +67,6 @@ export class Action {
     var point = newRoot.firstChild;
     await this.nvim.outWriteLine(`${point.filename}  ${root.filename}`);
     while (true) {
-      await this.nvim.outWriteLine(point.filename);
       if (point.filename === root.filename && point instanceof FolderElement) {
         point.unfold = true;
         point.firstChild = root.firstChild;
@@ -90,7 +82,13 @@ export class Action {
     const file = (await this.nvim.callFunction('input', [
       `Touch a file in : ${f.path}/`,
     ])) as string;
-    FileSystem.touchFile(`${f.path}/${file}`);
+    const status = FileSystem.touchFile(`${f.path}/${file}`);
+    if (status === false) {
+      this.nvim.errWriteLine(`[NodeTree] ${file} has exist.`);
+      return;
+    } else {
+      this.nvim.outWriteLine(`[NodeTree] You has touch file: "${file}"`);
+    }
     await this.update(f.parent);
   }
   async mkdir(f: BaseElement) {
@@ -102,15 +100,32 @@ export class Action {
     }
     const status = FileSystem.createDir(`${f.path}/${folder}`);
     if (status === false) {
+      this.nvim.errWriteLine(`[NodeTree] ${folder} has exist.`);
+      return;
+    } else {
+      this.nvim.outWriteLine(`[NodeTree] You has made directory "${folder}"`);
     }
     await this.update(f.parent);
   }
   async remove(f: BaseElement) {
-    const before = f.before;
-    const after = f.after;
-    before.after = after;
-    after.before = before;
-    FileSystem.delete(f.fullpath);
+    const res = (await this.nvim.callFunction('input', [
+      `Do your want to delete :${f.fullpath}  | [y/N] `,
+    ])) as string;
+    if (res.length === 0) {
+      return;
+    } else if (res === 'y' || res === 'yes') {
+      const after = f.after;
+      const before = f.before;
+      if (before) {
+        before.after = after;
+      }
+      if (after) {
+        after.before = before;
+      }
+      FileSystem.delete(f.fullpath);
+    } else {
+      return;
+    }
   }
 
   /*
@@ -118,32 +133,34 @@ export class Action {
    * will use in mkdir, touch, rename
    * */
   private async update(f: FolderElement) {
-    const nf = FileSystem.createRoot(f.fullpath);
-    await nf.generateChildren();
-    // var op = f.firstChild;
-    // var dp = op;
-    // var np = nf.firstChild;
-    // while (np) {
-    //   dp = op;
-    //   while (dp) {
-    //     if (
-    //       dp.filename === np.filename &&
-    //       dp instanceof FolderElement &&
-    //       np instanceof FolderElement
-    //     ) {
-    //       op = dp;
-    //       np.firstChild = dp.firstChild;
-    //       np.lastChild = dp.lastChild;
-    //       break;
-    //     }
-    //     dp = dp.after;
-    //   }
-    //   if (!dp) {
-    //     break;
-    //   }
-    //   np = np.after;
-    // }
-    f.firstChild = nf.firstChild;
-    f.lastChild = nf.lastChild;
+    var op = f.firstChild;
+    f.firstChild = null;
+    f.lastChild = null;
+    await f.generateChildren();
+    var np = f.firstChild;
+
+    while (true) {
+      if (
+        op &&
+        np &&
+        op instanceof FolderElement &&
+        np instanceof FolderElement
+      ) {
+        if (op.filename > np.filename) {
+          np = np.after;
+        } else if (op.filename > np.filename) {
+          op = op.after;
+        } else {
+          if (op.unfold) {
+            np.unfold = true;
+            np.applyChildren(op.firstChild, op.lastChild);
+          }
+          op = op.after;
+          np = np.after;
+        }
+      } else {
+        break;
+      }
+    }
   }
 }

@@ -6,15 +6,7 @@ const index_1 = require("../fs/index");
 const buffer_1 = require("../window/buffer");
 const hl_1 = require("../hl");
 const action_1 = require("../action");
-// const TRUN = '└';
-// const LINE = '|';
-const TRUN = ' ';
-const LINE = ' ';
 /*
- * There has 4 tasks in this function.
- * 1. rendered text.
- * 2. read all highlight rules and await in a promise.all queue.
- * 3.
  * */
 class Vim {
     constructor(nvim) {
@@ -22,17 +14,24 @@ class Vim {
         this.ac = new action_1.Action(nvim);
     }
     async render() {
-        var point;
-        var stack = [this.root];
         await this.buffer.setOption('modifiable', true);
         let prefix = ' ';
         this.hl_queue = [];
         this.context = [];
-        while (true) {
-            point = stack.pop();
-            if (point.after)
-                stack.push(point.after);
-            if (this.hidden === true && point.key !== this.root.key) {
+        /*
+         * 1. push correct text to context.
+         * 2. push right postion in hl_queue.
+         * 3. prefix increment at the right time.(into folder)
+         * 4. prefix decrement at the right time.(out of folder)
+         *
+         * so when the point will go into folder
+         * and when the point will went out of folder
+         *
+         * stack push when has after or children
+         *
+         * */
+        var dfs = (point) => {
+            if (this.hidden) {
                 if (point.filename[0] !== '.') {
                     this.context.push(`${prefix}${point.attribute.icon} ${point.filename}`);
                     this.hl_queue.push({
@@ -40,6 +39,7 @@ class Vim {
                         line: this.context.length - 1,
                         colStart: prefix.length,
                         colEnd: prefix.length + 4,
+                        srcId: this.namespace,
                     });
                 }
             }
@@ -50,29 +50,29 @@ class Vim {
                     line: this.context.length - 1,
                     colStart: prefix.length,
                     colEnd: prefix.length + 4,
+                    srcId: this.namespace,
                 });
             }
-            if (point instanceof folder_1.FolderElement &&
-                point.unfold === true &&
-                point.firstChild) {
-                if (this.hidden === true && point.key !== this.root.key) {
+            if (point instanceof folder_1.FolderElement && point.firstChild && point.unfold) {
+                if (this.hidden) {
                     if (point.filename[0] !== '.') {
-                        prefix = `${prefix}  `;
-                        stack.push(point.firstChild);
+                        prefix = prefix + '  ';
+                        dfs(point.firstChild);
                     }
                 }
                 else {
-                    prefix = `${prefix}  `;
-                    stack.push(point.firstChild);
+                    prefix = prefix + '  ';
+                    dfs(point.firstChild);
                 }
             }
-            if (point.key !== this.root.key && !point.after) {
+            if (point.after) {
+                dfs(point.after);
+            }
+            else {
                 prefix = prefix.substring(0, prefix.length - 2);
             }
-            if (stack.length === 0) {
-                break;
-            }
-        }
+        };
+        dfs(this.root);
         // render text
         this.buffer.setLines(this.context, {
             start: 0,
@@ -102,10 +102,13 @@ class Vim {
         this.hl = new hl_1.VimHighlight();
         this.namespace = await this.hl.init(this.nvim);
         this.hidden = (await this.nvim.getVar('node_tree_hide_files'));
+        this.context = [];
+        this.hl_queue = [];
     }
     async open() {
         const pwd = await this.nvim.commandOutput('pwd');
-        if (this.root.path !== pwd) {
+        // TODO: Lazy render
+        if (this.root.fullpath !== pwd || this.context.length === 0) {
             this.root = index_1.FileSystem.createRoot(pwd);
             await this.root.generateChildren();
             await this.render();
@@ -129,13 +132,11 @@ class Vim {
             if (point instanceof folder_1.FolderElement &&
                 point.unfold === true &&
                 point.firstChild) {
-                // hide file
                 if (this.hidden === true && point.key !== this.root.key) {
                     if (point.filename[0] !== '.')
                         stack.push(point.firstChild);
                 }
                 else {
-                    // dont hide file
                     stack.push(point.firstChild);
                 }
             }
