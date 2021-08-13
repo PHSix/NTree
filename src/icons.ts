@@ -767,6 +767,6 @@ export const folderIcons = {
     icon: '',
     name: 'DefaultFolder',
   },
-}
+};
 
 export default icons;

@@ -44,6 +44,7 @@ class Vim {
     constructor(nvim) {
         this.nvim = nvim;
         this.ac = new action_1.Action(nvim);
+        this.getRoot = this.rootCache();
     }
     async render() {
         await this.buffer.setOption('modifiable', true);
@@ -139,12 +140,16 @@ class Vim {
     }
     async open() {
         const pwd = await this.nvim.commandOutput('pwd');
-        if (checkPath(this.root.fullpath, pwd, this.hidden) ||
-            this.context.length === 0) {
-            this.root = index_1.FileSystem.createRoot(pwd);
-            await this.root.generateChildren();
-            await this.render();
-        }
+        this.root = await this.getRoot(pwd);
+        await this.render();
+        // if (
+        //   checkPath(this.root.fullpath, pwd, this.hidden) ||
+        //   this.context.length === 0
+        // ) {
+        //   this.root = FileSystem.createRoot(pwd);
+        //   await this.root.generateChildren();
+        //   await this.render();
+        // }
     }
     async action(to) {
         const [col] = await this.nvim.window.cursor;
@@ -183,6 +188,29 @@ class Vim {
                 return point;
             }
         }
+    }
+    /*
+     * maintain a cache queue
+     * to promise save history
+     * */
+    rootCache() {
+        var cache_queue = [];
+        /*
+         * if dont exist in cache will push in cache array.
+         * if exist, will return root folder element of array
+         * */
+        return async (pwd) => {
+            const index = cache_queue.findIndex((item) => item.fullpath === pwd);
+            if (index === -1) {
+                const r = index_1.FileSystem.createRoot(pwd);
+                await r.generateChildren();
+                cache_queue.push(r);
+                return cache_queue[cache_queue.length - 1];
+            }
+            else {
+                return cache_queue[index];
+            }
+        };
     }
 }
 exports.Vim = Vim;

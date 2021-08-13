@@ -48,6 +48,7 @@ export class Vim {
   ac: Action;
   hidden: boolean;
   win: Window;
+  getRoot: (pwd: string) => Promise<FolderElement>;
   async render() {
     await this.buffer.setOption('modifiable', true);
     let prefix = ' ';
@@ -133,6 +134,7 @@ export class Vim {
   constructor(nvim: Neovim) {
     this.nvim = nvim;
     this.ac = new Action(nvim);
+    this.getRoot = this.rootCache();
   }
   async init() {
     const pwd = await this.nvim.commandOutput('pwd');
@@ -147,14 +149,16 @@ export class Vim {
   }
   async open() {
     const pwd = await this.nvim.commandOutput('pwd');
-    if (
-      checkPath(this.root.fullpath, pwd, this.hidden) ||
-      this.context.length === 0
-    ) {
-      this.root = FileSystem.createRoot(pwd);
-      await this.root.generateChildren();
-      await this.render();
-    }
+    this.root = await this.getRoot(pwd)
+    await this.render()
+    // if (
+    //   checkPath(this.root.fullpath, pwd, this.hidden) ||
+    //   this.context.length === 0
+    // ) {
+    //   this.root = FileSystem.createRoot(pwd);
+    //   await this.root.generateChildren();
+    //   await this.render();
+    // }
   }
   async action(to: string) {
     const [col] = await this.nvim.window.cursor;
@@ -191,5 +195,27 @@ export class Vim {
         return point;
       }
     }
+  }
+  /*
+   * maintain a cache queue
+   * to promise save history
+   * */
+  rootCache() {
+    var cache_queue: FolderElement[] = [];
+    /*
+     * if dont exist in cache will push in cache array.
+     * if exist, will return root folder element of array
+     * */
+    return async (pwd: string): Promise<FolderElement> => {
+      const index = cache_queue.findIndex((item) => item.fullpath === pwd);
+      if (index === -1) {
+        const r = FileSystem.createRoot(pwd);
+        await r.generateChildren();
+        cache_queue.push(r);
+        return cache_queue[cache_queue.length - 1];
+      } else {
+        return cache_queue[index];
+      }
+    };
   }
 }

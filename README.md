@@ -113,5 +113,7 @@ support actions.
 - [ ] git status support
 - [ ] float window show keymap
 - [ ] vsplit and split window to view
+- [ ] indent line
 - [x] use the build-in rpc instead of remote plugin
+- [x] history cache
 
