@@ -16,13 +16,6 @@ NodeTree inspired bv `neovim-remote-plugin`, so it will spend too less startupti
 - neovim
 - [patch font](https://nerdfonts.com) (Need a patch font to right to display file icon.)
 
-# Inspried
-
-- neovim-remote-plugin
-- [node-client](https://github.com/neovim/node-client)
-- nodejs
-- [chadtree](https://github.com/ms-jpq/chadtree)
-- [nvim-tree.lua](https://github.com/kyazdani42/nvim-tree.lua)
 
 # Installtion
 
@@ -107,6 +100,15 @@ support actions.
 | edit   | [o, enter] | If target is a file, NodeTree will open, folder as toggle. |
 | delete | dd         | delete a file                                              |
 | hide   | zh         | Toggle hide dotfile or not                                 |
+
+
+# Thanks
+
+- neovim-remote-plugin
+- [node-client](https://github.com/neovim/node-client)
+- nodejs
+- [chadtree](https://github.com/ms-jpq/chadtree)
+- [nvim-tree.lua](https://github.com/kyazdani42/nvim-tree.lua)
 
 # TODO
 
