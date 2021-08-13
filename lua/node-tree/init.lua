@@ -3,8 +3,6 @@ local M = {}
 local api = vim.api
 local loaded = false
 
-local dirname
-
 local notify = function(msg, args)
   vim.rpcnotify(vim.g.node_tree_channel_id, msg, args or {})
 end
@@ -44,6 +42,8 @@ function M.setup()
   end
   vim.cmd [[augroup nodetree]]
   vim.cmd [[autocmd FileType NodeTree lua require("node-tree").registerKeymap()]]
+  vim.cmd [[autocmd WinEnter * lua require("node-tree")._exit_if_only()]]
+  vim.cmd [[autocmd WinEnter * lua require("node-tree")._resize_window()]]
   vim.cmd [[augroup END]]
   vim.cmd [[command! NToggle lua require("node-tree").toggle()]]
 end
@@ -61,8 +61,20 @@ function M.registerKeymap()
   api.nvim_buf_set_keymap(0, "n", "dd", ":lua require('node-tree').action('remove')<CR>", default_opts)
 end
 
-function M.registerDirname(dir)
-  dirname = unpack(dir)
+function M._resize_window()
+  for _, v in pairs(vim.api.nvim_list_wins()) do
+    if vim.api.nvim_buf_get_option(vim.api.nvim_win_get_buf(v), "filetype") == "NodeTree" then
+      vim.api.nvim_win_set_width(v, 30)
+    end
+  end
 end
 
+function M._exit_if_only()
+  if
+    #vim.api.nvim_list_wins() == 1 and
+      vim.api.nvim_buf_get_option(vim.api.nvim_win_get_buf(0), "filetype") == "NodeTree"
+   then
+    vim.cmd [[q]]
+  end
+end
 return M

@@ -62,5 +62,4 @@ function! s:job_opts.on_exit(chan_id, code, event) dict
     endfor
   endif
 endfunction
-call luaeval('require("node-tree").registerDirname(...)', [s:dirname])
 lua require('node-tree').setup()
