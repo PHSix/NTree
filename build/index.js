@@ -22,5 +22,5 @@ nvim.on('notification', async (method, args) => {
 nvim.channelId.then(async (channelId) => {
     await nvim.setVar('node_tree_channel_id', channelId);
     store = new index_1.Vim(nvim);
-    await store.init();
+    //await store.init();
 });

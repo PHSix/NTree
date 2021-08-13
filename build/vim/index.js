@@ -45,6 +45,10 @@ class Vim {
         this.nvim = nvim;
         this.ac = new action_1.Action(nvim);
         this.getRoot = this.rootCache();
+        this.context = [];
+        this.hl_queue = [];
+        this.hl = new hl_1.VimHighlight();
+        this.init();
     }
     async render() {
         await this.buffer.setOption('modifiable', true);
@@ -132,24 +136,16 @@ class Vim {
         this.root = index_1.FileSystem.createRoot(pwd);
         await this.root.generateChildren();
         this.buffer = await buffer_1.createBuffer(this.nvim);
-        this.hl = new hl_1.VimHighlight();
         this.namespace = await this.hl.init(this.nvim);
         this.hidden = (await this.nvim.getVar('node_tree_hide_files'));
-        this.context = [];
-        this.hl_queue = [];
     }
     async open() {
         const pwd = await this.nvim.commandOutput('pwd');
-        this.root = await this.getRoot(pwd);
-        await this.render();
-        // if (
-        //   checkPath(this.root.fullpath, pwd, this.hidden) ||
-        //   this.context.length === 0
-        // ) {
-        //   this.root = FileSystem.createRoot(pwd);
-        //   await this.root.generateChildren();
-        //   await this.render();
-        // }
+        if (checkPath(this.root.fullpath, pwd, this.hidden) ||
+            this.context.length === 0) {
+            this.root = await this.getRoot(pwd);
+            await this.render();
+        }
     }
     async action(to) {
         const [col] = await this.nvim.window.cursor;
