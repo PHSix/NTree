@@ -13,6 +13,7 @@ class VimHighlight {
             hl_queue.push(nvim.command(`highlight NodeTreeIcon${item.hl} guifg=${item.color}`));
         }
         hl_queue.push(nvim.command(`hi NodeTreeNormal guifg=#ffffff`));
+        hl_queue.push(nvim.command(`hi NodeTreePrefix guifg=#737373`));
         await Promise.all(hl_queue);
     }
 }
