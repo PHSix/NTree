@@ -111,18 +111,16 @@ class Vim {
             strictIndexing: false,
         });
         // set highlight rules
-        const queue = [];
         this.hl_queue.forEach((hl) => {
-            queue.push(this.buffer.addHighlight({
+            this.buffer.addHighlight({
                 hlGroup: hl.hlGroup,
                 line: hl.line,
                 colStart: hl.colStart,
                 colEnd: hl.colEnd,
                 srcId: this.namespace,
-            }));
+            });
         });
-        await Promise.all(queue);
-        await this.buffer.setOption('modifiable', false);
+        this.buffer.setOption('modifiable', false);
         await this.client.setVar('_node_tree_rendered', 1);
     }
     async init() {
