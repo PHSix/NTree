@@ -6,7 +6,7 @@ const file_1 = require("../dom/file");
 const fs_1 = require("../fs");
 class Action {
     constructor(nvim) {
-        this.nvim = nvim;
+        this.client = nvim;
     }
     async handle(element, to, store) {
         switch (to) {
@@ -43,8 +43,8 @@ class Action {
     }
     async edit(f, v) {
         if (await v.win.valid) {
-            this.nvim.setWindow(v.win);
-            this.nvim.command(`e ${f.fullpath}`);
+            this.client.setWindow(v.win);
+            this.client.command(`e ${f.fullpath}`);
         }
         else {
             // TODO:
@@ -52,7 +52,7 @@ class Action {
     }
     async hide(store) {
         store.hidden = !store.hidden;
-        this.nvim.setVar('node_tree_hide_files', store.hidden);
+        this.client.setVar('node_tree_hide_files', store.hidden);
     }
     async toggle(f) {
         f.unfold = !f.unfold;
@@ -61,7 +61,7 @@ class Action {
         }
     }
     async rename(f) {
-        const reFilename = (await this.nvim.callFunction('input', [
+        const reFilename = (await this.client.callFunction('input', [
             `Do you want to rename to: ${f.path}/`,
             f.filename,
         ]));
@@ -73,7 +73,7 @@ class Action {
         const newRoot = fs_1.FileSystem.createRoot(root.path);
         await newRoot.generateChildren();
         var point = newRoot.firstChild;
-        await this.nvim.outWriteLine(`${point.filename}  ${root.filename}`);
+        await this.client.outWriteLine(`${point.filename}  ${root.filename}`);
         while (true) {
             if (point.filename === root.filename && point instanceof folder_1.FolderElement) {
                 point.unfold = true;
@@ -88,21 +88,21 @@ class Action {
         store.root = newRoot;
     }
     async touch(f) {
-        const file = (await this.nvim.callFunction('input', [
+        const file = (await this.client.callFunction('input', [
             `Touch a file in : ${f.path}/`,
         ]));
         const status = fs_1.FileSystem.touchFile(`${f.path}/${file}`);
         if (status === false) {
-            this.nvim.errWriteLine(`[NodeTree] ${file} has exist.`);
+            this.client.errWriteLine(`[NodeTree] ${file} has exist.`);
             return;
         }
         else {
-            this.nvim.outWriteLine(`[NodeTree] You has touch file: "${file}"`);
+            this.client.outWriteLine(`[NodeTree] You has touch file: "${file}"`);
         }
         await this.update(f.parent);
     }
     async mkdir(f) {
-        const folder = (await this.nvim.callFunction('input', [
+        const folder = (await this.client.callFunction('input', [
             `Create a directory in : ${f.path}/`,
         ]));
         if (!folder || folder.length === 0) {
@@ -110,16 +110,16 @@ class Action {
         }
         const status = fs_1.FileSystem.createDir(`${f.path}/${folder}`);
         if (status === false) {
-            this.nvim.errWriteLine(`[NodeTree] ${folder} has exist.`);
+            this.client.errWriteLine(`[NodeTree] ${folder} has exist.`);
             return;
         }
         else {
-            this.nvim.outWriteLine(`[NodeTree] You has made directory "${folder}"`);
+            this.client.outWriteLine(`[NodeTree] You has made directory "${folder}"`);
         }
         await this.update(f.parent);
     }
     async remove(f) {
-        const res = (await this.nvim.callFunction('input', [
+        const res = (await this.client.callFunction('input', [
             `Do your want to delete :${f.fullpath}  | [y/N] `,
         ]));
         if (res.length === 0) {

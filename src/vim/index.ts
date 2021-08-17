@@ -7,6 +7,18 @@ import { createBuffer } from '../window/buffer';
 import { VimHighlight } from '../hl';
 import { Action } from '../action';
 
+const LINE = '│ ';
+const TURN = '└ ';
+const SPACE = '  ';
+
+function calcCol(prefix: string) {
+  const indentRe = /\│|\└/g;
+  const spaceRe = / /g;
+  const indentLen = (prefix.match(indentRe) || []).length * 3;
+  const spaceLen = (prefix.match(spaceRe) || []).length;
+  return indentLen + spaceLen;
+}
+
 /*
  *  what is true? if true will do anything?
  *  if return true.
@@ -40,7 +52,7 @@ function checkPath(root: string, pwd: string, hide: boolean) {
 export class Vim {
   buffer: Buffer;
   root: FolderElement;
-  nvim: Neovim;
+  client: Neovim;
   hl_queue: HighlightRule[];
   hl: VimHighlight;
   context: string[];
@@ -67,41 +79,24 @@ export class Vim {
      *
      * */
     var dfs = (point: BaseElement) => {
-      if (this.hidden) {
-        if (point.filename[0] !== '.') {
-          this.context.push(
-            `${prefix}${point.attribute.icon} ${point.filename}`
-          );
-          this.hl_queue.push({
-            hlGroup: point.attribute.hlGroup,
-            line: this.context.length - 1,
-            colStart: prefix.length,
-            colEnd: prefix.length + 4,
-            srcId: this.namespace,
-          });
-        }
-      } else {
-        this.context.push(`${prefix}${point.attribute.icon} ${point.filename}`);
-        this.hl_queue.push({
-          hlGroup: point.attribute.hlGroup,
-          line: this.context.length - 1,
-          colStart: prefix.length,
-          colEnd: prefix.length + 4,
-          srcId: this.namespace,
-        });
-      }
+      prefix = this.calcPrefix(point, prefix);
       if (point instanceof FolderElement && point.firstChild && point.unfold) {
         if (this.hidden) {
-          if (point.filename[0] !== '.') {
-            prefix = prefix + '  ';
+          if (point.filename[0] !== '.' || point.key === this.root.key) {
+            if (prefix[prefix.length - 2] === '└')
+              prefix = prefix.substring(0, prefix.length - 2) + SPACE;
+            prefix = prefix + LINE;
             dfs(point.firstChild);
           }
         } else {
-          prefix = prefix + '  ';
+          prefix = prefix + LINE;
           dfs(point.firstChild);
         }
       }
       if (point.after) {
+        if (!point.after.after) {
+          prefix = prefix.substring(0, prefix.length - 2) + TURN;
+        }
         dfs(point.after);
       } else {
         prefix = prefix.substring(0, prefix.length - 2);
@@ -115,41 +110,37 @@ export class Vim {
       strictIndexing: false,
     });
     // set highlight rules
-    const queue: Promise<number>[] = [];
     this.hl_queue.forEach((hl) => {
-      queue.push(
-        this.buffer.addHighlight({
-          hlGroup: hl.hlGroup,
-          line: hl.line,
-          colStart: hl.colStart,
-          colEnd: hl.colEnd,
-          srcId: this.namespace,
-        })
-      );
+      this.buffer.addHighlight({
+        hlGroup: hl.hlGroup,
+        line: hl.line,
+        colStart: hl.colStart,
+        colEnd: hl.colEnd,
+        srcId: this.namespace,
+      });
     });
-    await Promise.all(queue);
-    await this.buffer.setOption('modifiable', false);
-    await this.nvim.setVar('_node_tree_rendered', 1);
+    this.buffer.setOption('modifiable', false);
+    await this.client.setVar('_node_tree_rendered', 1);
   }
   constructor(nvim: Neovim) {
-    this.nvim = nvim;
+    this.client = nvim;
     this.ac = new Action(nvim);
     this.getRoot = this.rootCache();
     this.context = [];
     this.hl_queue = [];
     this.hl = new VimHighlight();
-    this.init()
+    this.init();
   }
   async init() {
-    const pwd = await this.nvim.commandOutput('pwd');
+    const pwd = await this.client.commandOutput('pwd');
     this.root = FileSystem.createRoot(pwd);
     await this.root.generateChildren();
-    this.buffer = await createBuffer(this.nvim);
-    this.namespace = await this.hl.init(this.nvim);
-    this.hidden = (await this.nvim.getVar('node_tree_hide_files')) as boolean;
+    this.buffer = await createBuffer(this.client);
+    this.namespace = await this.hl.init(this.client);
+    this.hidden = (await this.client.getVar('node_tree_hide_files')) as boolean;
   }
   async open() {
-    const pwd = await this.nvim.commandOutput('pwd');
+    const pwd = await this.client.commandOutput('pwd');
     if (
       checkPath(this.root.fullpath, pwd, this.hidden) ||
       this.context.length === 0
@@ -159,7 +150,7 @@ export class Vim {
     }
   }
   async action(to: string) {
-    const [col] = await this.nvim.window.cursor;
+    const [col] = await this.client.window.cursor;
     const element = this.findElement(col);
     await this.ac.handle(element, to, this);
     await this.render();
@@ -215,5 +206,40 @@ export class Vim {
         return cache_queue[index];
       }
     };
+  }
+
+  calcPrefix(point: BaseElement, prefix: string) {
+    const prefixLen = calcCol(prefix);
+    //hide dot file mode
+    if (this.hidden) {
+      if (point.filename[0] !== '.' || point.key === this.root.key) {
+        if (!point.after && point.key !== this.root.key) {
+          prefix = prefix.substring(0, prefix.length - 2) + TURN;
+        }
+        this.context.push(`${prefix}${point.attribute.icon} ${point.filename}`);
+      } else {
+        return prefix;
+      }
+    } else {
+      if (!point.after && point.key !== this.root.key) {
+        prefix = prefix.substring(0, prefix.length - 2) + TURN;
+      }
+      this.context.push(`${prefix}${point.attribute.icon} ${point.filename}`);
+    }
+    this.hl_queue.push({
+      hlGroup: 'NodeTreePrefix',
+      line: this.context.length - 1,
+      colStart: 0,
+      colEnd: prefixLen,
+      srcId: this.namespace,
+    });
+    this.hl_queue.push({
+      hlGroup: point.attribute.hlGroup,
+      line: this.context.length - 1,
+      colStart: prefixLen,
+      colEnd: prefixLen + 4,
+      srcId: this.namespace,
+    });
+    return prefix;
   }
 }
