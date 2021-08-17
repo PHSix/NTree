@@ -26,10 +26,15 @@ function! s:node_install_deps()
     echoerr "[NodeTree] You dont has nodejs package manager!(you maybe need to install a cli tool like npm.)"
     return
   endif
+  call system(printf("rm -rf %s/node_modules", s:dirname))
   let s:install_dep_cmd = printf("cd %s && %s", s:dirname, s:install_dep_cmd)
   echom "[NodeTree] Your are installing nodejs dependences...."
   call system(s:install_dep_cmd)
   echom "[NodeTree] Your has installed nodejs dependences."
+  
+  let s:scmd = printf("source %s/plugin/node-tree.vim", s:dirname)
+  echo s:scmd
+  eval printf("source %s/plugin/node-tree.vim", s:dirname)
 endfunction
 
 function! s:node_error_msg_notify()

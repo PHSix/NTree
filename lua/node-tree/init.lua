@@ -4,7 +4,11 @@ local api = vim.api
 local loaded = false
 
 local notify = function(msg, args)
-  vim.rpcnotify(vim.g.node_tree_channel_id, msg, args or {})
+  if vim.g.node_tree_channel_id ~= nil then
+    vim.rpcnotify(vim.g.node_tree_channel_id, msg, args or {})
+  else
+    vim.api.nvim_err_writeln [[[NodeTree] Start nodetree failed, check dependences has installed.(To run :NDeps)]]
+  end
 end
 
 local existWin = function()
