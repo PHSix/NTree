@@ -43,6 +43,9 @@ export class Action {
     }
   }
 
+  /*
+   * edit file action
+   */
   async edit(f: BaseElement, v: Vim) {
     if (await v.win.valid) {
       this.client.setWindow(v.win);
@@ -51,10 +54,17 @@ export class Action {
       // TODO:
     }
   }
+  /*
+   * action for change hide file status
+   * */
   async hide(store: Vim) {
     store.hidden = !store.hidden;
     this.client.setVar('node_tree_hide_files', store.hidden);
   }
+
+  /*
+   * action for toggle folder
+   * */
   async toggle(f: FolderElement) {
     f.unfold = !f.unfold;
     if (f.unfold && f.firstChild === undefined) {
@@ -66,8 +76,11 @@ export class Action {
       `Do you want to rename to: ${f.path}/`,
       f.filename,
     ])) as string;
-    FileSystem.renameFile(f.fullpath, `${f.path}/${reFilename}`);
-    await this.update(f.parent);
+    if (FileSystem.renameFile(f.fullpath, `${f.path}/${reFilename}`)) {
+      await this.update(f.parent);
+    } else {
+      this.client.errWriteLine('[NodeTree] Rename failed');
+    }
   }
   async dirup(store: Vim) {
     const root = store.root;
@@ -87,35 +100,56 @@ export class Action {
     }
     store.root = newRoot;
   }
+  /*
+   * action for create a new file
+   * */
   async touch(f: BaseElement) {
+    var path = f.path;
+    var refreshNode = f.parent;
+    if (f instanceof FolderElement && f.unfold && !f.firstChild) {
+      path = f.fullpath;
+      refreshNode = f;
+    }
     const file = (await this.client.callFunction('input', [
-      `Touch a file in : ${f.path}/`,
+      `Touch a file in : ${path}/`,
     ])) as string;
-    const status = FileSystem.touchFile(`${f.path}/${file}`);
+    const status = FileSystem.touchFile(`${path}/${file}`);
     if (status === false) {
       this.client.errWriteLine(`[NodeTree] ${file} has exist.`);
       return;
     } else {
       this.client.outWriteLine(`[NodeTree] You has touch file: "${file}"`);
     }
-    await this.update(f.parent);
+    await this.update(refreshNode);
   }
+  /*
+   * action for make a new directory
+   * */
   async mkdir(f: BaseElement) {
+    var path = f.path;
+    var refreshNode = f.parent;
+    if (f instanceof FolderElement && f.unfold && !f.firstChild) {
+      path = f.fullpath;
+      refreshNode = f;
+    }
     const folder = (await this.client.callFunction('input', [
-      `Create a directory in : ${f.path}/`,
+      `Create a directory in : ${path}/`,
     ])) as string;
     if (!folder || folder.length === 0) {
       return;
     }
-    const status = FileSystem.createDir(`${f.path}/${folder}`);
+    const status = FileSystem.createDir(`${path}/${folder}`);
     if (status === false) {
       this.client.errWriteLine(`[NodeTree] ${folder} has exist.`);
       return;
     } else {
       this.client.outWriteLine(`[NodeTree] You has made directory "${folder}"`);
     }
-    await this.update(f.parent);
+    await this.update(refreshNode);
   }
+  /*
+   * action for remove a file or folder
+   * */
   async remove(f: BaseElement) {
     const res = (await this.client.callFunction('input', [
       `Do your want to delete :${f.fullpath}  | [y/N] `,

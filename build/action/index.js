@@ -41,6 +41,9 @@ class Action {
             await this.toggle(f);
         }
     }
+    /*
+     * edit file action
+     */
     async edit(f, v) {
         if (await v.win.valid) {
             this.client.setWindow(v.win);
@@ -50,10 +53,16 @@ class Action {
             // TODO:
         }
     }
+    /*
+     * action for change hide file status
+     * */
     async hide(store) {
         store.hidden = !store.hidden;
         this.client.setVar('node_tree_hide_files', store.hidden);
     }
+    /*
+     * action for toggle folder
+     * */
     async toggle(f) {
         f.unfold = !f.unfold;
         if (f.unfold && f.firstChild === undefined) {
@@ -65,8 +74,12 @@ class Action {
             `Do you want to rename to: ${f.path}/`,
             f.filename,
         ]));
-        fs_1.FileSystem.renameFile(f.fullpath, `${f.path}/${reFilename}`);
-        await this.update(f.parent);
+        if (fs_1.FileSystem.renameFile(f.fullpath, `${f.path}/${reFilename}`)) {
+            await this.update(f.parent);
+        }
+        else {
+            this.client.errWriteLine('[NodeTree] Rename failed');
+        }
     }
     async dirup(store) {
         const root = store.root;
@@ -87,11 +100,20 @@ class Action {
         }
         store.root = newRoot;
     }
+    /*
+     * action for create a new file
+     * */
     async touch(f) {
+        var path = f.path;
+        var refreshNode = f.parent;
+        if (f instanceof folder_1.FolderElement && f.unfold && !f.firstChild) {
+            path = f.fullpath;
+            refreshNode = f;
+        }
         const file = (await this.client.callFunction('input', [
-            `Touch a file in : ${f.path}/`,
+            `Touch a file in : ${path}/`,
         ]));
-        const status = fs_1.FileSystem.touchFile(`${f.path}/${file}`);
+        const status = fs_1.FileSystem.touchFile(`${path}/${file}`);
         if (status === false) {
             this.client.errWriteLine(`[NodeTree] ${file} has exist.`);
             return;
@@ -99,16 +121,25 @@ class Action {
         else {
             this.client.outWriteLine(`[NodeTree] You has touch file: "${file}"`);
         }
-        await this.update(f.parent);
+        await this.update(refreshNode);
     }
+    /*
+     * action for make a new directory
+     * */
     async mkdir(f) {
+        var path = f.path;
+        var refreshNode = f.parent;
+        if (f instanceof folder_1.FolderElement && f.unfold && !f.firstChild) {
+            path = f.fullpath;
+            refreshNode = f;
+        }
         const folder = (await this.client.callFunction('input', [
-            `Create a directory in : ${f.path}/`,
+            `Create a directory in : ${path}/`,
         ]));
         if (!folder || folder.length === 0) {
             return;
         }
-        const status = fs_1.FileSystem.createDir(`${f.path}/${folder}`);
+        const status = fs_1.FileSystem.createDir(`${path}/${folder}`);
         if (status === false) {
             this.client.errWriteLine(`[NodeTree] ${folder} has exist.`);
             return;
@@ -116,8 +147,11 @@ class Action {
         else {
             this.client.outWriteLine(`[NodeTree] You has made directory "${folder}"`);
         }
-        await this.update(f.parent);
+        await this.update(refreshNode);
     }
+    /*
+     * action for remove a file or folder
+     * */
     async remove(f) {
         const res = (await this.client.callFunction('input', [
             `Do your want to delete :${f.fullpath}  | [y/N] `,
