@@ -97,6 +97,11 @@ class Vim {
                 if (!point.after.after) {
                     prefix = prefix.substring(0, prefix.length - 2) + TURN;
                 }
+                else if (this.hidden === true &&
+                    point.filename[0] !== '.' &&
+                    point.after.after.filename[0] === '.') {
+                    prefix = prefix.substring(0, prefix.length - 2) + TURN;
+                }
                 dfs(point.after);
             }
             else {
@@ -111,15 +116,15 @@ class Vim {
             strictIndexing: false,
         });
         // set highlight rules
-        this.hl_queue.forEach((hl) => {
+        for (let i = 0; i < this.hl_queue.length; i++) {
             this.buffer.addHighlight({
-                hlGroup: hl.hlGroup,
-                line: hl.line,
-                colStart: hl.colStart,
-                colEnd: hl.colEnd,
+                hlGroup: this.hl_queue[i].hlGroup,
+                line: this.hl_queue[i].line,
+                colStart: this.hl_queue[i].colStart,
+                colEnd: this.hl_queue[i].colEnd,
                 srcId: this.namespace,
             });
-        });
+        }
         this.buffer.setOption('modifiable', false);
         await this.client.setVar('_node_tree_rendered', 1);
     }
