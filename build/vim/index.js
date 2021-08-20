@@ -80,15 +80,15 @@ class Vim {
         var dfs = (point) => {
             prefix = this.calcPrefix(point, prefix);
             if (point instanceof folder_1.FolderElement && point.firstChild && point.unfold) {
-                if (this.hidden) {
-                    if (point.filename[0] !== '.' || point.key === this.root.key) {
-                        if (prefix[prefix.length - 2] === '└')
-                            prefix = prefix.substring(0, prefix.length - 2) + SPACE;
-                        prefix = prefix + LINE;
-                        dfs(point.firstChild);
-                    }
+                if (this.hidden &&
+                    (point.filename[0] !== '.' || point.key === this.root.key)) {
+                    prefix =
+                        prefix[prefix.length - 2] === '└'
+                            ? (prefix = prefix.substring(0, prefix.length - 2) + SPACE + LINE)
+                            : (prefix = prefix + LINE);
+                    dfs(point.firstChild);
                 }
-                else {
+                else if (!this.hidden) {
                     prefix = prefix + LINE;
                     dfs(point.firstChild);
                 }
