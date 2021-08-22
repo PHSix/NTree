@@ -28,8 +28,8 @@ export class VimHighlight {
         nvim.command(`highlight NodeTreeIcon${item.hl} guifg=${item.color}`)
       );
     }
-    hl_queue.push(nvim.command(`hi NodeTreeNormal guifg=#ffffff`));
-    hl_queue.push(nvim.command(`hi NodeTreePrefix guifg=#737373`));
+    hl_queue.push(nvim.command(`hi! link NodeTreeNormal Normal`));
+    hl_queue.push(nvim.command(`hi! link NodeTreePrefix Comment`));
     await Promise.all(hl_queue);
   }
 }
