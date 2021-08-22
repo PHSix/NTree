@@ -97,11 +97,13 @@ class Vim {
                 if (!point.after.after) {
                     prefix = prefix.substring(0, prefix.length - 2) + TURN;
                 }
-                else if (this.hidden === true &&
-                    point.filename[0] !== '.' &&
-                    point.after.after.filename[0] === '.') {
-                    prefix = prefix.substring(0, prefix.length - 2) + TURN;
-                }
+                // else if (
+                //   this.hidden === true &&
+                //   point.filename[0] !== '.' &&
+                //   point.after.after.filename[0] === '.'
+                // ) {
+                //   prefix = prefix.substring(0, prefix.length - 2) + TURN;
+                // }
                 dfs(point.after);
             }
             else {
