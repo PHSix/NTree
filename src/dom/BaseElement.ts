@@ -1,4 +1,5 @@
-import { FolderElement } from "./folder";
+import { FolderElement } from './folder';
+import { Neovim } from 'neovim';
 
 export interface BaseAttribute {
   icon: string;
@@ -14,6 +15,21 @@ export class BaseElement {
   after: BaseElement;
   before: BaseElement;
   parent: FolderElement;
+  findNextElement(hide: boolean): BaseElement {
+    var point: BaseElement = this.after;
+    if (hide) {
+      while (point) {
+        if (point.filename[0] === ".") {
+          point = point.after;
+        } else {
+          break;
+        }
+      }
+      return point;
+    } else {
+      return point;
+    }
+  }
   insertBefore(b: BaseElement) {
     b.before = this.before;
     this.before.after = b;

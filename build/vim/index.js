@@ -93,22 +93,24 @@ class Vim {
                     dfs(point.firstChild);
                 }
             }
-            if (point.after) {
-                if (!point.after.after) {
+            const nxt = point.findNextElement(this.hidden);
+            if (nxt) {
+                if (!nxt.findNextElement(this.hidden)) {
                     prefix = prefix.substring(0, prefix.length - 2) + TURN;
                 }
-                // else if (
-                //   this.hidden === true &&
-                //   point.filename[0] !== '.' &&
-                //   point.after.after.filename[0] === '.'
-                // ) {
-                //   prefix = prefix.substring(0, prefix.length - 2) + TURN;
-                // }
-                dfs(point.after);
+                dfs(nxt);
             }
             else {
                 prefix = prefix.substring(0, prefix.length - 2);
             }
+            // if (point.after) {
+            //   if (!point.after.after) {
+            //     prefix = prefix.substring(0, prefix.length - 2) + TURN;
+            //   } 
+            //   dfs(point.after);
+            // } else {
+            //   prefix = prefix.substring(0, prefix.length - 2);
+            // }
         };
         dfs(this.root);
         // render text

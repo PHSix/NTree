@@ -9,6 +9,23 @@ class BaseElement {
         this.parent = parent;
         this.key = Symbol();
     }
+    findNextElement(hide) {
+        var point = this.after;
+        if (hide) {
+            while (point) {
+                if (point.filename[0] === ".") {
+                    point = point.after;
+                }
+                else {
+                    break;
+                }
+            }
+            return point;
+        }
+        else {
+            return point;
+        }
+    }
     insertBefore(b) {
         b.before = this.before;
         this.before.after = b;
