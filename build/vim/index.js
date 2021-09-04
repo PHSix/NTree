@@ -136,7 +136,7 @@ class Vim {
         const pwd = await this.client.commandOutput('pwd');
         this.root = index_1.FileSystem.createRoot(pwd);
         await this.root.generateChildren();
-        this.buffer = await buffer_1.createBuffer(this.client);
+        this.buffer = await (0, buffer_1.createBuffer)(this.client);
         this.namespace = await this.hl.init(this.client);
         this.hidden = (await this.client.getVar('node_tree_hide_files'));
     }

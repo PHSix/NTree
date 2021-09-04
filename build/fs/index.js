@@ -9,7 +9,7 @@ const folder_1 = require("../dom/folder");
 class FileSystem {
     static renameFile(oldpath, newpath) {
         try {
-            fs_1.renameSync(oldpath, newpath);
+            (0, fs_1.renameSync)(oldpath, newpath);
             return true;
         }
         catch (err) {
@@ -27,7 +27,7 @@ class FileSystem {
      * @return [folderArray: FolderElement[], fileArray: FileElement[]]
      * */
     static async findChildren(fullpath, parent) {
-        const baseArr = await promises_1.readdir(fullpath);
+        const baseArr = await (0, promises_1.readdir)(fullpath);
         const files = [];
         const folders = [];
         if (baseArr.length === 0) {
@@ -35,7 +35,7 @@ class FileSystem {
         }
         const stat_queue = [];
         baseArr.forEach((filename) => {
-            stat_queue.push(promises_1.stat(`${fullpath}/${filename}`));
+            stat_queue.push((0, promises_1.stat)(`${fullpath}/${filename}`));
         });
         await Promise.all(stat_queue).then((result) => {
             result.forEach((item, index) => {
@@ -51,17 +51,17 @@ class FileSystem {
     }
     static touchFile(path) {
         try {
-            fs_1.statSync(path);
+            (0, fs_1.statSync)(path);
             return false;
         }
         catch (err) {
-            fs_1.closeSync(fs_1.openSync(path, 'w'));
+            (0, fs_1.closeSync)((0, fs_1.openSync)(path, 'w'));
             return true;
         }
     }
     static createDir(path) {
         try {
-            fs_1.mkdirSync(path);
+            (0, fs_1.mkdirSync)(path);
             return true;
         }
         catch (err) {
@@ -70,7 +70,7 @@ class FileSystem {
     }
     static delete(path) {
         try {
-            child_process_1.execSync(`rm -rf ${path}`);
+            (0, child_process_1.execSync)(`rm -rf ${path}`);
             return true;
         }
         catch (err) {

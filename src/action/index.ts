@@ -87,7 +87,6 @@ export class Action {
     const newRoot = FileSystem.createRoot(root.path);
     await newRoot.generateChildren();
     var point = newRoot.firstChild;
-    await this.client.outWriteLine(`${point.filename}  ${root.filename}`);
     while (true) {
       if (point.filename === root.filename && point instanceof FolderElement) {
         point.unfold = true;
