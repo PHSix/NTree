@@ -13,32 +13,17 @@ endif
 let s:dirname = expand("<sfile>:h:h")
 
 function! s:node_install_deps() 
-  if executable("cnpm")==1
-    let s:package_tool = "cnpm"
-    " let s:install_dep_cmd = printf("%s install", s:package_tool)
-    let s:install_dep_cmd = [s:package_tool, "install"]
-  elseif executable("yarn")==1
-    let s:package_tool = "yarn"
-    let s:install_dep_cmd = [s:package_tool]
-  elseif executable("npm")==1
-    let s:package_tool = "npm"
-    let s:install_dep_cmd = [s:package_tool, "install"]
-  else
-    echoerr "[NodeTree] You dont has nodejs package manager! (you maybe need to install a cli tool like npm.)"
-    return
-  endif
   call system(printf("rm -rf %s/node_modules", s:dirname))
-  call system(printf("cd %s", s:dirname))
   echom "[NodeTree] You are installing nodejs dependences...."
   let l:shell_opts = {}
   function! l:shell_opts.on_stdout(chan_id, msg,event) abort
-    echom a:msg
+    echom a:msg[0]
   endfunction
   function! l:shell_opts.on_exit(chan_id, msg,event) abort
     echom "[NodeTree] You has installed nodejs dependences."
     call s:start()
   endfunction
-  call jobstart(s:install_dep_cmd, l:shell_opts)
+  call jobstart(["bash", printf("%s/script/deps.sh", s:dirname), s:dirname], l:shell_opts)
 endfunction
 
 function! s:node_error_msg_notify()
@@ -74,4 +59,4 @@ if empty(glob(printf('%s/node_modules', s:dirname))) > 0
   finish
 endif
 
-call s:next()
+call s:start()

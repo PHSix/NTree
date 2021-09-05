@@ -11,5 +11,5 @@ then
 else
   return
 fi
-
+cd $1
 eval $depTools
