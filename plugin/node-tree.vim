@@ -19,34 +19,33 @@ function! s:node_install_deps()
     let s:install_dep_cmd = [s:package_tool, "install"]
   elseif executable("yarn")==1
     let s:package_tool = "yarn"
-    let s:install_dep_cmd = ["s:package_tool"]
+    let s:install_dep_cmd = [s:package_tool]
   elseif executable("npm")==1
     let s:package_tool = "npm"
     let s:install_dep_cmd = [s:package_tool, "install"]
   else
-    echoerr "[NodeTree] You dont has nodejs package manager!(you maybe need to install a cli tool like npm.)"
+    echoerr "[NodeTree] You dont has nodejs package manager! (you maybe need to install a cli tool like npm.)"
     return
   endif
   call system(printf("rm -rf %s/node_modules", s:dirname))
-  let s:install_dep_cmd = printf("cd %s && %s", s:dirname, s:install_dep_cmd)
-  echom "[NodeTree] Your are installing nodejs dependences...."
-  " call system(s:install_dep_cmd)
+  call system(printf("cd %s", s:dirname))
+  echom "[NodeTree] You are installing nodejs dependences...."
   let l:shell_opts = {}
   function! l:shell_opts.on_stdout(chan_id, msg,event) abort
     echom a:msg
   endfunction
-  function! l:shell_opts.on_stderr(chan_id, msg,event) abort
-    echom "[NodeTree] Your has installed nodejs dependences."
-    call s:next()
+  function! l:shell_opts.on_exit(chan_id, msg,event) abort
+    echom "[NodeTree] You has installed nodejs dependences."
+    call s:start()
   endfunction
-  call jobstart(["yarn"], l:shell_opts)
+  call jobstart(s:install_dep_cmd, l:shell_opts)
 endfunction
 
 function! s:node_error_msg_notify()
   echoerr "[NodeTree] You need run NDeps at the first time to install dependences..."
 endfunction
 
-function s:next() abort
+function s:start() abort
 
   let s:job_opts = {}
   let s:std_err = []
