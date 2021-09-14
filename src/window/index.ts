@@ -20,8 +20,8 @@ export async function createWindow(nvim: Neovim): Promise<Window> {
       break;
     }
   }
-  await nvim.setOption('splitright', false);
-  await nvim.command(`30vsplit`);
+  nvim.setOption('splitright', false);
+  nvim.command(`30vsplit`);
   let window = await nvim.window;
   window.request(`${window.prefix}set_width`, [window, 30]);
   setWindowOptions(window);
